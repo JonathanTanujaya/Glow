@@ -786,6 +786,252 @@ html, body {
 .modal-text:last-child {
   margin-bottom: 0;
 }
+
+/* ────────────────────────────
+   GUIDED TOUR
+──────────────────────────── */
+#tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+#tour-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.tour-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 601;
+}
+.tour-spotlight {
+  position: fixed;
+  z-index: 602;
+  border-radius: 16px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.78);
+  transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              left 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              border-radius 0.4s ease;
+  pointer-events: none;
+}
+.tour-spotlight::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  border: 2px solid var(--teal);
+  animation: tourPulse 2s ease-in-out infinite;
+}
+@keyframes tourPulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+.tour-tooltip {
+  position: fixed;
+  z-index: 603;
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  width: calc(100% - 40px);
+  max-width: 320px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s ease;
+  animation: tourSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes tourSlideUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(16px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.tour-tooltip-arrow {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  left: 50%;
+  transform: translateX(-50%) rotate(45);
+  border-radius: 3px;
+}
+.tour-tooltip-arrow.up {
+  top: -7px;
+  transform: translateX(-50%) rotate(45deg);
+}
+.tour-tooltip-arrow.down {
+  bottom: -7px;
+  transform: translateX(-50%) rotate(45deg);
+}
+.tour-step-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--green-light);
+  color: var(--green-dark);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 100px;
+  margin-bottom: 10px;
+}
+.tour-step-badge i {
+  font-size: 13px;
+}
+.tour-text {
+  font-size: 14px;
+  color: #222;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+.tour-progress {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+.tour-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ddd;
+  transition: background 0.3s, width 0.3s;
+}
+.tour-dot.active {
+  background: var(--green);
+  width: 18px;
+  border-radius: 4px;
+}
+.tour-dot.done {
+  background: var(--green-mid);
+}
+.tour-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tour-btn-next {
+  flex: 1;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.tour-btn-next:active {
+  background: var(--green-dark);
+  transform: scale(0.97);
+}
+.tour-btn-skip {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 8px;
+  -webkit-tap-highlight-color: transparent;
+}
+.tour-btn-skip:active {
+  color: #666;
+}
+
+/* Final celebration */
+.tour-final-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 610;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.tour-final-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.tour-final-card {
+  background: #fff;
+  border-radius: 28px;
+  padding: 32px 24px;
+  text-align: center;
+  max-width: 300px;
+  width: 90%;
+  transform: scale(0.85);
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+}
+.tour-final-overlay.active .tour-final-card {
+  transform: scale(1);
+}
+.tour-final-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--green-light), var(--green-mid));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 32px;
+  color: var(--green-dark);
+  animation: tourCelebrate 0.6s ease 0.3s both;
+}
+@keyframes tourCelebrate {
+  0% { transform: scale(0) rotate(-30deg); }
+  60% { transform: scale(1.15) rotate(5deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.tour-final-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+.tour-final-sub {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+.tour-final-btn {
+  width: 100%;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 100px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.tour-final-btn:active {
+  background: var(--green-dark);
+  transform: scale(0.97);
+}
 </style>
 </head>
 <body>
@@ -1209,6 +1455,11 @@ html, body {
             <span class="menu-label">Settings</span>
             <i class="ti ti-chevron-right menu-arrow"></i>
           </div>
+          <div class="menu-row" onclick="replayTour()">
+            <i class="ti ti-player-play menu-icon"></i>
+            <span class="menu-label">Replay Tour</span>
+            <i class="ti ti-chevron-right menu-arrow"></i>
+          </div>
         </div>
       </div>
     </div>
@@ -1253,6 +1504,37 @@ html, body {
       <p id="modal-product-use" class="modal-text">Directions of use...</p>
       <p class="modal-section-title">Key Benefit</p>
       <p id="modal-product-benefit" class="modal-text">Key benefit...</p>
+    </div>
+  </div>
+
+  <!-- ── GUIDED TOUR ── -->
+  <div id="tour-overlay">
+    <div class="tour-backdrop"></div>
+    <div class="tour-spotlight" id="tour-spotlight"></div>
+    <div class="tour-tooltip" id="tour-tooltip">
+      <div class="tour-tooltip-arrow up" id="tour-arrow"></div>
+      <div class="tour-step-badge" id="tour-badge">
+        <i class="ti ti-compass"></i>
+        <span id="tour-badge-text">Step 1 of 8</span>
+      </div>
+      <p class="tour-text" id="tour-text">Welcome!</p>
+      <div class="tour-progress" id="tour-progress"></div>
+      <div class="tour-actions">
+        <button class="tour-btn-skip" onclick="endTour()">Skip</button>
+        <button class="tour-btn-next" id="tour-btn-next" onclick="nextTourStep()">
+          Next <i class="ti ti-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tour Final Celebration -->
+  <div class="tour-final-overlay" id="tour-final">
+    <div class="tour-final-card">
+      <div class="tour-final-icon"><i class="ti ti-sparkles"></i></div>
+      <p class="tour-final-title">You're All Set! ✨</p>
+      <p class="tour-final-sub">Start your skincare journey now. Scan your face and get the best personalized formula.</p>
+      <button class="tour-final-btn" onclick="closeTourFinal()">Get Started</button>
     </div>
   </div>
 
@@ -1475,6 +1757,8 @@ setTimeout(() => {
   setTimeout(() => {
     document.getElementById('splash').remove();
     startCamera();
+    // Always start tour on every app open
+    setTimeout(() => startTour(), 600);
   }, 600);
 }, 1500);
 
@@ -1640,6 +1924,210 @@ function showProductDetails(id) {
 
 function closeProductModal() {
   document.getElementById('product-modal').classList.remove('active');
+}
+
+/* ────────────────────────────
+   GUIDED TOUR ENGINE
+──────────────────────────── */
+const tourSteps = [
+  {
+    screen: 'scan',
+    target: '.scan-corners',
+    text: 'Position your face inside this frame. You can drag the corners to adjust the size.',
+    position: 'below',
+    icon: 'ti-focus-2',
+    spotlightRadius: '50%'
+  },
+  {
+    screen: 'scan',
+    target: '#screen-scan .btn-primary',
+    text: 'Tap this button to start the AI Skin Scan. Make sure you have good lighting.',
+    position: 'above',
+    icon: 'ti-scan'
+  },
+  {
+    screen: 'results',
+    target: '.score-ring',
+    text: 'This is your overall skin health score based on the AI analysis results.',
+    position: 'below',
+    icon: 'ti-chart-donut-3'
+  },
+  {
+    screen: 'results',
+    target: '.rec-tabs',
+    text: 'Browse personalized skincare product recommendations for your morning and night routines.',
+    position: 'below',
+    icon: 'ti-sparkles'
+  },
+  {
+    screen: 'results',
+    target: '.results-footer .btn-primary',
+    text: 'Tap to view your personalized formula crafted specifically for your skin condition.',
+    position: 'above',
+    icon: 'ti-flask'
+  },
+  {
+    screen: 'formula',
+    target: '.eco-box',
+    text: 'All ingredients are 100% plant-based, eco-friendly, and dermatologist-tested.',
+    position: 'above',
+    icon: 'ti-leaf'
+  },
+  {
+    screen: 'order',
+    target: '.plan-card.featured',
+    text: 'Choose the monthly subscription to save 15% and get automatic refills every month.',
+    position: 'below',
+    icon: 'ti-shopping-cart'
+  },
+  {
+    screen: 'profile',
+    target: '.profile-stats-row',
+    text: 'Track your skin score, total scans, and your improvement progress here.',
+    position: 'below',
+    icon: 'ti-user'
+  }
+];
+
+let currentTourStep = 0;
+let tourActive = false;
+
+function startTour() {
+  currentTourStep = 0;
+  tourActive = true;
+  const overlay = document.getElementById('tour-overlay');
+  overlay.classList.add('active');
+  buildProgressDots();
+  showTourStep(0);
+}
+
+function buildProgressDots() {
+  const container = document.getElementById('tour-progress');
+  container.innerHTML = '';
+  for (let i = 0; i < tourSteps.length; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'tour-dot';
+    dot.id = 'tour-dot-' + i;
+    container.appendChild(dot);
+  }
+}
+
+function showTourStep(index) {
+  if (index < 0 || index >= tourSteps.length) return;
+
+  const step = tourSteps[index];
+  
+  // Navigate to the correct screen
+  navigate(step.screen);
+  
+  // Small delay to let the screen render
+  setTimeout(() => {
+    const targetEl = document.querySelector(step.target);
+    if (!targetEl) {
+      console.warn('Tour target not found:', step.target);
+      nextTourStep();
+      return;
+    }
+    
+    const rect = targetEl.getBoundingClientRect();
+    const spotlight = document.getElementById('tour-spotlight');
+    const tooltip = document.getElementById('tour-tooltip');
+    const arrow = document.getElementById('tour-arrow');
+    const badge = document.getElementById('tour-badge-text');
+    const text = document.getElementById('tour-text');
+    const btnNext = document.getElementById('tour-btn-next');
+    const badgeIcon = document.querySelector('.tour-step-badge i');
+    
+    // Position spotlight with padding
+    const pad = 10;
+    spotlight.style.top = (rect.top - pad) + 'px';
+    spotlight.style.left = (rect.left - pad) + 'px';
+    spotlight.style.width = (rect.width + pad * 2) + 'px';
+    spotlight.style.height = (rect.height + pad * 2) + 'px';
+    spotlight.style.borderRadius = step.spotlightRadius || '16px';
+    
+    // Update tooltip content
+    badge.textContent = 'Step ' + (index + 1) + ' of ' + tourSteps.length;
+    text.textContent = step.text;
+    badgeIcon.className = 'ti ' + (step.icon || 'ti-compass');
+    
+    // Position tooltip above or below the spotlight
+    tooltip.style.removeProperty('top');
+    tooltip.style.removeProperty('bottom');
+    
+    if (step.position === 'below') {
+      const topPos = rect.bottom + pad + 20;
+      tooltip.style.top = topPos + 'px';
+      arrow.className = 'tour-tooltip-arrow up';
+    } else {
+      const bottomPos = window.innerHeight - rect.top + pad + 20;
+      tooltip.style.bottom = bottomPos + 'px';
+      arrow.className = 'tour-tooltip-arrow down';
+    }
+    
+    // Re-trigger animation
+    tooltip.style.animation = 'none';
+    tooltip.offsetHeight; // force reflow
+    tooltip.style.animation = '';
+    
+    // Update progress dots
+    for (let i = 0; i < tourSteps.length; i++) {
+      const dot = document.getElementById('tour-dot-' + i);
+      if (dot) {
+        dot.className = 'tour-dot';
+        if (i < index) dot.classList.add('done');
+        if (i === index) dot.classList.add('active');
+      }
+    }
+    
+    // Update button text for last step
+    if (index === tourSteps.length - 1) {
+      btnNext.innerHTML = 'Finish <i class="ti ti-check"></i>';
+    } else {
+      btnNext.innerHTML = 'Next <i class="ti ti-arrow-right"></i>';
+    }
+  }, 100);
+}
+
+function nextTourStep() {
+  currentTourStep++;
+  if (currentTourStep >= tourSteps.length) {
+    endTour();
+    showTourFinal();
+  } else {
+    showTourStep(currentTourStep);
+  }
+}
+
+function endTour() {
+  tourActive = false;
+  const overlay = document.getElementById('tour-overlay');
+  overlay.classList.remove('active');
+  try {
+    localStorage.setItem('tourCompleted', 'true');
+  } catch (e) {
+    console.warn('localStorage access denied:', e);
+  }
+  // Return to scan screen
+  navigate('scan');
+}
+
+function showTourFinal() {
+  const final = document.getElementById('tour-final');
+  final.classList.add('active');
+}
+
+function closeTourFinal() {
+  const final = document.getElementById('tour-final');
+  final.classList.remove('active');
+  navigate('scan');
+}
+
+function replayTour() {
+  try {
+    localStorage.removeItem('tourCompleted');
+  } catch (e) {}
+  startTour();
 }
 </script>
 </body>
