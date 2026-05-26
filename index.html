@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GlowSphere">
+<meta name="theme-color" content="#1D9E75">
+<title>GlowSphere</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green: #1D9E75;
+  --green-dark: #0F6E56;
+  --green-deeper: #085041;
+  --green-light: #E1F5EE;
+  --green-mid: #9FE1CB;
+  --teal: #5DCAA5;
+  --amber: #FAC775;
+  --blue: #378ADD;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #0d0d0d;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ── SPLASH ── */
+#splash {
+  position: fixed; inset: 0;
+  background: var(--green-dark);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px; z-index: 999;
+  transition: opacity 0.5s ease;
+}
+#splash.hide { opacity: 0; pointer-events: none; }
+.splash-logo {
+  width: 72px; height: 72px;
+  border-radius: 22px;
+  background: rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; color: #fff;
+}
+.splash-name { font-size: 22px; font-weight: 600; color: #fff; letter-spacing: -0.5px; }
+.splash-tag { font-size: 12px; color: rgba(255,255,255,0.6); }
+.splash-loader {
+  width: 40px; height: 3px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.splash-loader::after {
+  content: '';
+  display: block;
+  height: 100%;
+  background: #fff;
+  border-radius: 2px;
+  animation: load 1.2s ease forwards;
+}
+@keyframes load { from { width: 0 } to { width: 100% } }
+
+/* ── APP SHELL ── */
+#app {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── SCREENS ── */
+.screen {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  position: absolute;
+  inset: 0;
+  bottom: calc(60px + var(--safe-bottom));
+}
+.screen.active { display: flex; }
+
+/* ── STATUS BAR ── */
+.status-bar {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: calc(var(--safe-top) + 10px) 20px 6px;
+  flex-shrink: 0;
+  z-index: 10;
+  position: relative;
+}
+.status-bar.dark { color: #fff; }
+.status-bar.light { color: #111; }
+.status-time { font-size: 15px; font-weight: 600; }
+.status-icons { display: flex; gap: 5px; align-items: center; font-size: 13px; }
+
+/* ── BOTTOM NAV ── */
+#bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: calc(60px + var(--safe-bottom));
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 0.5px solid rgba(0,0,0,0.1);
+  display: flex; align-items: flex-start;
+  padding-top: 6px;
+  z-index: 100;
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 2px;
+  color: #bbb; font-size: 22px; cursor: pointer;
+  transition: color 0.2s;
+  padding: 2px 0;
+}
+.nav-item.active { color: var(--green); }
+.nav-label { font-size: 9px; font-weight: 500; }
+.nav-scan {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--green);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 22px; cursor: pointer;
+  margin-top: -12px;
+  box-shadow: 0 4px 16px rgba(29,158,117,0.4);
+  transition: background 0.2s, transform 0.15s;
+  flex-shrink: 0;
+}
+.nav-scan:active { background: var(--green-dark); transform: scale(0.94); }
+
+/* ── BUTTONS ── */
+.btn-primary {
+  width: 100%;
+  background: var(--green);
+  color: var(--green-light);
+  border: none; border-radius: 100px;
+  padding: 14px;
+  font-size: 15px; font-weight: 500;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: inherit;
+  transition: background 0.2s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-primary:active { background: var(--green-dark); transform: scale(0.98); }
+
+.btn-outline {
+  width: 100%;
+  background: transparent;
+  color: var(--green);
+  border: 1px solid var(--green);
+  border-radius: 100px;
+  padding: 13px;
+  font-size: 15px; font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-outline:active { background: var(--green-light); transform: scale(0.98); }
+
+/* ── CARDS ── */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px;
+  border: 0.5px solid rgba(0,0,0,0.08);
+}
+.card-dark {
+  background: rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 14px;
+  border: 0.5px solid rgba(255,255,255,0.1);
+}
+
+/* ── PILLS ── */
+.pill {
+  font-size: 11px; padding: 4px 10px;
+  border-radius: 100px; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.pill-g { background: rgba(29,158,117,0.2); color: #5DCAA5; }
+.pill-b { background: rgba(55,138,221,0.18); color: #85B7EB; }
+.pill-a { background: rgba(239,159,39,0.2); color: #FAC775; }
+.pill-p { background: rgba(127,119,221,0.2); color: #AFA9EC; }
+
+/* ── BAR ── */
+.bar-track { flex: 1; height: 5px; background: #f0f0ee; border-radius: 3px; }
+.bar-fill { height: 5px; border-radius: 3px; }
+
+/* ────────────────────────────
+   SCREEN 1: SCAN
+──────────────────────────── */
+#screen-scan {
+  background: #0a0a0a;
+}
+.scan-body {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 20px; padding: 0 24px;
+  position: relative;
+  z-index: 5;
+}
+.scan-corners {
+  position: relative;
+  width: 200px; height: 240px;
+  z-index: 6;
+  pointer-events: none;
+}
+.scan-oval {
+  position: absolute; inset: 0;
+  border: 2px solid var(--green);
+  border-radius: 100px;
+  background: transparent;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+.scan-video-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* mirror front camera */
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 1;
+}
+.scan-video-bg.active {
+  opacity: 1;
+}
+.rotate-anim {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.btn-primary:disabled {
+  background: var(--green-dark);
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+.scan-corner {
+  position: absolute;
+  width: 20px; height: 20px;
+  border-color: #fff;
+  border-style: solid;
+}
+.sc-tl { top: -1px; left: -1px; border-width: 2.5px 0 0 2.5px; border-radius: 6px 0 0 0; }
+.sc-tr { top: -1px; right: -1px; border-width: 2.5px 2.5px 0 0; border-radius: 0 6px 0 0; }
+.sc-bl { bottom: -1px; left: -1px; border-width: 0 0 2.5px 2.5px; border-radius: 0 0 0 6px; }
+.sc-br { bottom: -1px; right: -1px; border-width: 0 2.5px 2.5px 0; border-radius: 0 0 6px 0; }
+.scan-icon {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px; color: rgba(29,158,117,0.4);
+}
+.scan-line {
+  position: absolute;
+  left: 8px; right: 8px; height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--green), transparent);
+  border-radius: 1px;
+  animation: scanLine 2s ease-in-out infinite;
+  top: 20%;
+}
+@keyframes scanLine {
+  0% { top: 20%; opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { top: 80%; opacity: 0; }
+}
+.scan-dots {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 12px; padding: 20px;
+}
+.scan-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(29,158,117,0.35);
+  animation: pulse 2s infinite;
+}
+.scan-dot:nth-child(2) { animation-delay: 0.2s; }
+.scan-dot:nth-child(3) { animation-delay: 0.4s; }
+.scan-dot:nth-child(5) { animation-delay: 0.3s; }
+.scan-dot:nth-child(7) { animation-delay: 0.5s; }
+@keyframes pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+.scan-labels {
+  text-align: center;
+}
+.scan-title { font-size: 18px; font-weight: 600; color: #fff; letter-spacing: -0.3px; }
+.scan-sub { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 4px; }
+.scan-pills { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.scan-footer {
+  padding: 0 20px calc(16px + var(--safe-bottom));
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+}
+.scan-hint {
+  font-size: 11px; color: rgba(255,255,255,0.3);
+  text-align: center; margin-bottom: 10px;
+}
+
+/* ────────────────────────────
+   SCREEN 2: RESULTS
+──────────────────────────── */
+#screen-results {
+  background: #f7f7f5;
+}
+.results-scroll {
+  flex: 1; overflow-y: auto; padding: 0 16px 16px;
+  display: flex; flex-direction: column; gap: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.results-header { text-align: center; padding: 4px 0 8px; }
+.results-title { font-size: 18px; font-weight: 600; color: #111; letter-spacing: -0.3px; }
+.results-sub { font-size: 12px; color: #888; margin-top: 2px; }
+
+.score-row { display: flex; align-items: center; gap: 14px; }
+.score-ring {
+  width: 76px; height: 76px;
+  border-radius: 50%;
+  border: 5px solid var(--green);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.score-num { font-size: 24px; font-weight: 700; color: var(--green); line-height: 1; }
+.score-lbl { font-size: 9px; color: #888; }
+.score-info { flex: 1; }
+.score-grade { font-size: 13px; font-weight: 600; color: var(--green-dark); }
+.score-desc { font-size: 11px; color: #666; margin-top: 4px; line-height: 1.5; }
+
+.cond-title { font-size: 12px; font-weight: 600; color: #222; margin-bottom: 10px; }
+.cond-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0; border-bottom: 0.5px solid #f0f0ee;
+}
+.cond-row:last-child { border: none; }
+.cond-name { font-size: 12px; color: #444; width: 84px; flex-shrink: 0; }
+.cond-val { font-size: 11px; font-weight: 500; width: 32px; text-align: right; flex-shrink: 0; }
+
+
+
+.results-footer { padding: 12px 16px calc(12px + var(--safe-bottom)); flex-shrink: 0; }
+
+/* ────────────────────────────
+   SCREEN 3: FORMULA
+──────────────────────────── */
+#screen-formula { background: #f7f7f5; }
+.formula-scroll {
+  flex: 1; overflow-y: auto; padding: 0 16px 16px;
+  display: flex; flex-direction: column; gap: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.formula-header { text-align: center; padding: 4px 0 8px; }
+.formula-title { font-size: 18px; font-weight: 600; color: #111; letter-spacing: -0.3px; }
+.formula-sub { font-size: 12px; color: #888; margin-top: 2px; }
+
+.ingr-title { font-size: 12px; font-weight: 600; color: #222; margin-bottom: 10px; }
+.ingr-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 0; border-bottom: 0.5px solid #f0f0ee;
+}
+.ingr-row:last-child { border: none; }
+.ingr-name { font-size: 12px; color: #333; width: 106px; flex-shrink: 0; }
+.ingr-pct { font-size: 11px; color: var(--green-dark); font-weight: 600; width: 30px; text-align: right; flex-shrink: 0; }
+
+.eco-box {
+  background: var(--green-light);
+  border-radius: 14px; padding: 12px 14px;
+  border: 0.5px solid var(--green-mid);
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; color: var(--green-deeper); line-height: 1.5;
+}
+.badges-row { display: flex; gap: 8px; }
+.badge-card {
+  flex: 1; background: #fff; border-radius: 12px;
+  border: 0.5px solid rgba(0,0,0,0.07);
+  padding: 10px 6px; text-align: center;
+  font-size: 10px; color: #666;
+}
+.badge-card i { font-size: 18px; color: var(--green); display: block; margin-bottom: 4px; }
+
+.formula-footer { padding: 12px 16px calc(12px + var(--safe-bottom)); flex-shrink: 0; }
+
+/* ────────────────────────────
+   SCREEN 4: ORDER
+──────────────────────────── */
+#screen-order { background: #f7f7f5; }
+.order-scroll {
+  flex: 1; overflow-y: auto; padding: 0 16px 16px;
+  display: flex; flex-direction: column; gap: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.order-header { text-align: center; padding: 4px 0 8px; }
+.order-title { font-size: 18px; font-weight: 600; color: #111; letter-spacing: -0.3px; }
+.order-sub { font-size: 12px; color: #888; margin-top: 2px; }
+
+.plan-card {
+  background: #fff; border-radius: 16px;
+  border: 0.5px solid rgba(0,0,0,0.08);
+  padding: 14px; cursor: pointer;
+  transition: border-color 0.2s;
+  position: relative;
+}
+.plan-card.featured { border: 2px solid var(--green); }
+.plan-badge {
+  position: absolute; top: -12px; left: 14px;
+  background: var(--green); color: var(--green-light);
+  font-size: 11px; padding: 4px 12px;
+  border-radius: 100px; font-weight: 600;
+}
+.plan-name { font-size: 13px; font-weight: 600; color: #222; }
+.plan-desc { font-size: 11px; color: #888; margin-top: 2px; }
+.plan-price {
+  font-size: 28px; font-weight: 700; color: #111; margin-top: 8px;
+  letter-spacing: -0.5px;
+}
+.plan-price.green { color: var(--green); }
+.plan-price span { font-size: 13px; color: #888; font-weight: 400; }
+.plan-perks { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
+.plan-perk {
+  font-size: 12px; color: #555;
+  display: flex; align-items: center; gap: 6px;
+}
+.plan-perk i { color: var(--green); font-size: 14px; }
+
+.order-footer {
+  padding: 12px 16px calc(12px + var(--safe-bottom));
+  flex-shrink: 0; display: flex; flex-direction: column; gap: 8px;
+}
+
+/* ────────────────────────────
+   SCREEN 5: PROFILE
+──────────────────────────── */
+#screen-profile { background: #f7f7f5; overflow: hidden; }
+.profile-header {
+  background: var(--green-dark);
+  padding: calc(var(--safe-top) + 50px) 20px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  flex-shrink: 0;
+}
+.avatar {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.35);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; color: #fff;
+}
+.profile-name-text { font-size: 17px; font-weight: 600; color: #fff; }
+.profile-tag-text { font-size: 11px; color: rgba(255,255,255,0.6); }
+.profile-stats-row {
+  display: flex; width: 100%;
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px; overflow: hidden;
+}
+.pstat { flex: 1; text-align: center; padding: 10px 4px; }
+.pstat:not(:last-child) { border-right: 0.5px solid rgba(255,255,255,0.15); }
+.pstat-n { font-size: 18px; font-weight: 700; color: #fff; }
+.pstat-l { font-size: 10px; color: rgba(255,255,255,0.6); }
+
+.profile-scroll {
+  flex: 1; overflow-y: auto; padding: 14px 16px calc(14px + var(--safe-bottom));
+  display: flex; flex-direction: column; gap: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.progress-card { }
+.progress-title { font-size: 12px; font-weight: 600; color: #222; margin-bottom: 10px; }
+.progress-chart { display: flex; gap: 5px; align-items: flex-end; height: 52px; }
+.pc-bar {
+  flex: 1; border-radius: 4px 4px 0 0;
+  background: var(--green); min-height: 6px; opacity: 0.4;
+}
+.pc-bar.hi { opacity: 1; }
+.progress-weeks { display: flex; gap: 5px; margin-top: 4px; }
+.pw { flex: 1; font-size: 9px; color: #bbb; text-align: center; }
+
+.section-hd { font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.6px; }
+.menu-list { display: flex; flex-direction: column; }
+.menu-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 0;
+  border-bottom: 0.5px solid #f0f0ee;
+  cursor: pointer;
+}
+.menu-row:last-child { border: none; }
+.menu-icon { font-size: 20px; color: var(--green); }
+.menu-label { font-size: 14px; color: #222; flex: 1; }
+.menu-arrow { font-size: 14px; color: #ccc; }
+
+/* ── RECOMMENDATIONS ── */
+.rec-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #222;
+  margin-top: 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.rec-tabs {
+  display: flex;
+  background: #eaeaea;
+  border-radius: 100px;
+  padding: 3px;
+  margin-bottom: 12px;
+}
+.rec-tab {
+  flex: 1;
+  text-align: center;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.rec-tab.active {
+  background: #fff;
+  color: var(--green);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.rec-products-container {
+  display: none;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+.rec-products-container.active {
+  display: flex;
+}
+.rec-products-container::-webkit-scrollbar {
+  display: none;
+}
+.rec-products-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.product-card {
+  flex: 0 0 160px;
+  scroll-snap-align: start;
+  background: #fff;
+  border-radius: 16px;
+  padding: 12px;
+  border: 0.5px solid rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+.product-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+}
+.product-img-wrapper {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--green-light) 0%, var(--green-mid) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 10px;
+  border: 0.5px solid rgba(29,158,117,0.15);
+}
+.product-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.product-img-wrapper img.loaded {
+  opacity: 1;
+}
+.product-placeholder-icon {
+  font-size: 28px;
+  color: var(--green-dark);
+  opacity: 0.7;
+}
+.product-step {
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--green);
+  background: var(--green-light);
+  padding: 2px 6px;
+  border-radius: 100px;
+  align-self: flex-start;
+  margin-bottom: 6px;
+}
+.product-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #111;
+  line-height: 1.3;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.product-brand {
+  font-size: 10px;
+  color: #888;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.product-match {
+  font-size: 9px;
+  color: #444;
+  line-height: 1.3;
+  background: #f7f7f5;
+  padding: 6px;
+  border-radius: 8px;
+  margin-top: auto;
+  border-left: 2px solid var(--green);
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal-content {
+  background: #fff;
+  width: 90%;
+  max-width: 340px;
+  border-radius: 24px;
+  padding: 20px;
+  position: relative;
+  transform: scale(0.9);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.modal-overlay.active .modal-content {
+  transform: scale(1);
+}
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f0f0ee;
+  border: none;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #666;
+}
+.modal-img-wrapper {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 16px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--green-light) 0%, var(--green-mid) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  border: 0.5px solid rgba(29,158,117,0.15);
+}
+.modal-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: none;
+}
+.modal-img-wrapper img.loaded {
+  display: block;
+}
+.modal-img-wrapper .modal-placeholder-icon {
+  font-size: 40px;
+  color: var(--green-dark);
+  opacity: 0.7;
+}
+#modal-product-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111;
+  margin-top: 8px;
+  margin-bottom: 2px;
+  text-align: center;
+}
+#modal-product-brand {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.modal-divider {
+  height: 0.5px;
+  background: #e8e8e6;
+  margin: 16px 0;
+}
+.modal-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #999;
+  letter-spacing: 0.6px;
+  margin-bottom: 4px;
+}
+.modal-text {
+  font-size: 12px;
+  color: #444;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+.modal-text:last-child {
+  margin-bottom: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash">
+  <div class="splash-logo"><i class="ti ti-sparkles"></i></div>
+  <p class="splash-name">GlowSphere</p>
+  <p class="splash-tag">AI-Driven Personalized Skincare</p>
+  <div class="splash-loader"></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- ── SCAN ── -->
+  <div id="screen-scan" class="screen active">
+    <video id="webcam" autoplay playsinline muted class="scan-video-bg"></video>
+    <div class="status-bar dark">
+      <span class="status-time" id="time-scan">9:41</span>
+      <span></span>
+      <span class="status-icons">
+        <i class="ti ti-wifi"></i>
+        <i class="ti ti-battery-2"></i>
+      </span>
+    </div>
+    <div class="scan-body">
+      <div class="scan-labels">
+        <p class="scan-title">AI Skin Scanner</p>
+        <p class="scan-sub">Position your face within the frame</p>
+      </div>
+      <div class="scan-corners">
+        <div class="scan-oval"></div>
+        <div class="scan-corner sc-tl"></div>
+        <div class="scan-corner sc-tr"></div>
+        <div class="scan-corner sc-bl"></div>
+        <div class="scan-corner sc-br"></div>
+        <i class="ti ti-user scan-icon"></i>
+        <div class="scan-line"></div>
+        <div class="scan-dots">
+          <div class="scan-dot"></div><div class="scan-dot"></div><div class="scan-dot"></div><div class="scan-dot"></div><div class="scan-dot"></div>
+          <div class="scan-dot"></div><div class="scan-dot"></div><div class="scan-dot"></div><div class="scan-dot"></div><div class="scan-dot"></div>
+          <div class="scan-dot"></div><div class="scan-dot"></div><div class="scan-dot"></div><div class="scan-dot"></div><div class="scan-dot"></div>
+        </div>
+      </div>
+      <div class="scan-pills">
+        <span class="pill pill-g"><i class="ti ti-droplet"></i> Hydration</span>
+        <span class="pill pill-a"><i class="ti ti-sun"></i> UV Damage</span>
+        <span class="pill pill-b"><i class="ti ti-circle-dotted"></i> Pores</span>
+        <span class="pill pill-g"><i class="ti ti-minus"></i> Fine Lines</span>
+        <span class="pill pill-p"><i class="ti ti-activity"></i> Oiliness</span>
+      </div>
+    </div>
+    <div class="scan-footer">
+      <p class="scan-hint">Keep still · good lighting · face forward</p>
+      <button class="btn-primary" onclick="triggerScan()">
+        <i class="ti ti-scan"></i> Start AI Scan
+      </button>
+    </div>
+  </div>
+
+  <!-- ── RESULTS ── -->
+  <div id="screen-results" class="screen">
+    <div class="status-bar light">
+      <span class="status-time" id="time-results">9:41</span>
+      <span></span>
+      <span class="status-icons" style="color:#333;">
+        <i class="ti ti-wifi"></i>
+        <i class="ti ti-battery-2"></i>
+      </span>
+    </div>
+    <div class="results-scroll">
+      <div class="results-header">
+        <p class="results-title">Skin Analysis</p>
+        <p class="results-sub">Based on your real-time facial scan</p>
+      </div>
+
+      <div class="card">
+        <div class="score-row">
+          <div class="score-ring">
+            <span class="score-num">74</span>
+            <span class="score-lbl">score</span>
+          </div>
+          <div class="score-info">
+            <p class="score-grade">Good condition</p>
+            <p class="score-desc">Oily T-zone with mild dehydration. Your personalized formula is ready.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="cond-title">Detected conditions</p>
+        <div class="cond-row">
+          <span class="cond-name">Oiliness</span>
+          <div class="bar-track"><div class="bar-fill" style="width:70%;background:#1D9E75;"></div></div>
+          <span class="cond-val" style="color:#0F6E56;">High</span>
+        </div>
+        <div class="cond-row">
+          <span class="cond-name">Hydration</span>
+          <div class="bar-track"><div class="bar-fill" style="width:35%;background:#FAC775;"></div></div>
+          <span class="cond-val" style="color:#BA7517;">Low</span>
+        </div>
+        <div class="cond-row">
+          <span class="cond-name">Sensitivity</span>
+          <div class="bar-track"><div class="bar-fill" style="width:28%;background:#5DCAA5;"></div></div>
+          <span class="cond-val" style="color:#0F6E56;">Mild</span>
+        </div>
+        <div class="cond-row">
+          <span class="cond-name">Acne</span>
+          <div class="bar-track"><div class="bar-fill" style="width:45%;background:#E24B4A;"></div></div>
+          <span class="cond-val" style="color:#A32D2D;">Med</span>
+        </div>
+        <div class="cond-row">
+          <span class="cond-name">Fine lines</span>
+          <div class="bar-track"><div class="bar-fill" style="width:18%;background:#85B7EB;"></div></div>
+          <span class="cond-val" style="color:#185FA5;">Low</span>
+        </div>
+      </div>
+
+
+      <!-- Skincare Recommendations Section -->
+      <div class="rec-title">
+        <i class="ti ti-sparkles" style="color: var(--green);"></i> Recommended Routine
+      </div>
+
+      <div class="rec-tabs">
+        <div class="rec-tab active" id="tab-morning" onclick="switchRecTab('morning')">
+          <i class="ti ti-sun"></i> Morning
+        </div>
+        <div class="rec-tab" id="tab-night" onclick="switchRecTab('night')">
+          <i class="ti ti-moon"></i> Night
+        </div>
+      </div>
+
+      <!-- Morning Recommendations -->
+      <div class="rec-products-container active" id="rec-morning">
+        <!-- Product 1 (sc01) -->
+        <div class="product-card" onclick="showProductDetails('sc01')">
+          <div class="product-img-wrapper">
+            <img src="sc01.png" alt="Gentle Gel Cleanser" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+            <i class="ti ti-droplet product-placeholder-icon"></i>
+          </div>
+          <span class="product-step">Cleanse</span>
+          <p class="product-name">Gentle Gel Cleanser</p>
+          <p class="product-brand">pH Balancing</p>
+          <p class="product-match">Cleanses T-Zone oiliness gently</p>
+        </div>
+
+        <!-- Product 2 (sc02) -->
+        <div class="product-card" onclick="showProductDetails('sc02')">
+          <div class="product-img-wrapper">
+            <img src="sc02.png" alt="Hydrating Essence Toner" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+            <i class="ti ti-droplet product-placeholder-icon"></i>
+          </div>
+          <span class="product-step">Hydrate</span>
+          <p class="product-name">Hydrating Essence</p>
+          <p class="product-brand">Deep Moisture</p>
+          <p class="product-match">Preps & relieves skin dehydration</p>
+        </div>
+
+        <!-- Product 3 (sc03) -->
+        <div class="product-card" onclick="showProductDetails('sc03')">
+          <div class="product-img-wrapper">
+            <img src="sc03.png" alt="10% Niacinamide Serum" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+            <i class="ti ti-flask product-placeholder-icon"></i>
+          </div>
+          <span class="product-step">Treat</span>
+          <p class="product-name">Niacinamide Serum</p>
+          <p class="product-brand">Brightening Boost</p>
+          <p class="product-match">Reduces acne & controls sebum</p>
+        </div>
+
+        <!-- Product 4 (sc04) -->
+        <div class="product-card" onclick="showProductDetails('sc04')">
+          <div class="product-img-wrapper">
+            <img src="sc04.png" alt="Centella Soothing Moisturizer" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+            <i class="ti ti-sparkles product-placeholder-icon"></i>
+          </div>
+          <span class="product-step">Moisturize</span>
+          <p class="product-name">Soothing Cream</p>
+          <p class="product-brand">Calm & Repair</p>
+          <p class="product-match">Soothes sensitivity & repairs barrier</p>
+        </div>
+
+        <!-- Product 5 (sc05) -->
+        <div class="product-card" onclick="showProductDetails('sc05')">
+          <div class="product-img-wrapper">
+            <img src="sc05.png" alt="SPF 50+ Sunscreen" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+            <i class="ti ti-sun product-placeholder-icon"></i>
+          </div>
+          <span class="product-step">Protect</span>
+          <p class="product-name">UV Defense SPF 50+</p>
+          <p class="product-brand">Matte Finish</p>
+          <p class="product-match">Matte shield for UV Index 6</p>
+        </div>
+      </div>
+
+      <!-- Night Recommendations -->
+      <div class="rec-products-container" id="rec-night">
+        <!-- Product 6 (sc06) -->
+        <div class="product-card" onclick="showProductDetails('sc06')">
+          <div class="product-img-wrapper">
+            <img src="sc06.png" alt="Purifying Cleansing Oil" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+            <i class="ti ti-leaf product-placeholder-icon"></i>
+          </div>
+          <span class="product-step">Double Cleanse</span>
+          <p class="product-name">Cleansing Oil</p>
+          <p class="product-brand">Melt Makeup & Sebum</p>
+          <p class="product-match">Dissolves impurities & oil buildup</p>
+        </div>
+
+        <!-- Product 7 (sc07) -->
+        <div class="product-card" onclick="showProductDetails('sc07')">
+          <div class="product-img-wrapper">
+            <img src="sc07.png" alt="2% BHA Pore Clarifying Liquid" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+            <i class="ti ti-flask product-placeholder-icon"></i>
+          </div>
+          <span class="product-step">Exfoliate</span>
+          <p class="product-name">BHA Pore Liquid</p>
+          <p class="product-brand">Pore Clarifying</p>
+          <p class="product-match">Cleans pores & reduces blackheads</p>
+        </div>
+
+        <!-- Product 8 (sc08) -->
+        <div class="product-card" onclick="showProductDetails('sc08')">
+          <div class="product-img-wrapper">
+            <img src="sc08.png" alt="0.5% Bakuchiol Renewal Serum" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+            <i class="ti ti-activity product-placeholder-icon"></i>
+          </div>
+          <span class="product-step">Target Repair</span>
+          <p class="product-name">Bakuchiol Serum</p>
+          <p class="product-brand">Gentle Renewal</p>
+          <p class="product-match">Targets fine lines & aging signs</p>
+        </div>
+
+        <!-- Product 9 (sc09) -->
+        <div class="product-card" onclick="showProductDetails('sc09')">
+          <div class="product-img-wrapper">
+            <img src="sc09.png" alt="Peptide Eye Cream" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+            <i class="ti ti-sparkles product-placeholder-icon"></i>
+          </div>
+          <span class="product-step">Eye Care</span>
+          <p class="product-name">Peptide Eye Cream</p>
+          <p class="product-brand">Firming Care</p>
+          <p class="product-match">Nourishes delicate skin under eyes</p>
+        </div>
+
+        <!-- Product 10 (sc10) -->
+        <div class="product-card" onclick="showProductDetails('sc10')">
+          <div class="product-img-wrapper">
+            <img src="sc10.png" alt="Ceramide Night Barrier Cream" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+            <i class="ti ti-moon product-placeholder-icon"></i>
+          </div>
+          <span class="product-step">Nourish</span>
+          <p class="product-name">Ceramide Cream</p>
+          <p class="product-brand">Overnight Recovery</p>
+          <p class="product-match">Locks moisture & repairs barrier</p>
+        </div>
+      </div>
+    </div>
+    <div class="results-footer">
+      <button class="btn-primary" onclick="navigate('formula')">
+        View my formula <i class="ti ti-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── FORMULA ── -->
+  <div id="screen-formula" class="screen">
+    <div class="status-bar light">
+      <span class="status-time" id="time-formula">9:41</span>
+      <span></span>
+      <span class="status-icons" style="color:#333;">
+        <i class="ti ti-wifi"></i>
+        <i class="ti ti-battery-2"></i>
+      </span>
+    </div>
+    <div class="formula-scroll">
+      <div class="formula-header">
+        <p class="formula-title">Your Formula</p>
+        <p class="formula-sub">Personalized for your skin today</p>
+      </div>
+
+      <div class="card">
+        <p class="ingr-title">Active ingredients</p>
+        <div class="ingr-row">
+          <span class="ingr-name">Niacinamide</span>
+          <div class="bar-track"><div class="bar-fill" style="width:80%;background:#1D9E75;"></div></div>
+          <span class="ingr-pct">10%</span>
+        </div>
+        <div class="ingr-row">
+          <span class="ingr-name">Hyaluronic Acid</span>
+          <div class="bar-track"><div class="bar-fill" style="width:60%;background:#1D9E75;"></div></div>
+          <span class="ingr-pct">5%</span>
+        </div>
+        <div class="ingr-row">
+          <span class="ingr-name">Centella Extract</span>
+          <div class="bar-track"><div class="bar-fill" style="width:45%;background:#1D9E75;"></div></div>
+          <span class="ingr-pct">3%</span>
+        </div>
+        <div class="ingr-row">
+          <span class="ingr-name">Zinc PCA</span>
+          <div class="bar-track"><div class="bar-fill" style="width:30%;background:#1D9E75;"></div></div>
+          <span class="ingr-pct">2%</span>
+        </div>
+        <div class="ingr-row">
+          <span class="ingr-name">Bakuchiol</span>
+          <div class="bar-track"><div class="bar-fill" style="width:18%;background:#1D9E75;"></div></div>
+          <span class="ingr-pct">1%</span>
+        </div>
+      </div>
+
+      <div class="eco-box">
+        <i class="ti ti-leaf" style="font-size:20px;color:#1D9E75;flex-shrink:0;"></i>
+        <span>100% plant-based ingredients · Refillable cartridge · Carbon-neutral delivery</span>
+      </div>
+
+      <div class="badges-row">
+        <div class="badge-card">
+          <i class="ti ti-clock"></i>
+          Ships in 3 days
+        </div>
+        <div class="badge-card">
+          <i class="ti ti-recycle"></i>
+          Zero waste
+        </div>
+        <div class="badge-card">
+          <i class="ti ti-certificate"></i>
+          Derm-tested
+        </div>
+      </div>
+    </div>
+    <div class="formula-footer">
+      <button class="btn-primary" onclick="navigate('order')">
+        Order now <i class="ti ti-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── ORDER ── -->
+  <div id="screen-order" class="screen">
+    <div class="status-bar light">
+      <span class="status-time" id="time-order">9:41</span>
+      <span></span>
+      <span class="status-icons" style="color:#333;">
+        <i class="ti ti-wifi"></i>
+        <i class="ti ti-battery-2"></i>
+      </span>
+    </div>
+    <div class="order-scroll">
+      <div class="order-header">
+        <p class="order-title">Choose a Plan</p>
+        <p class="order-sub">First order includes your starter kit</p>
+      </div>
+
+      <div class="plan-card">
+        <p class="plan-name">One-time purchase</p>
+        <p class="plan-desc">Starter kit + personalized formula</p>
+        <p class="plan-price">$32<span>.00</span></p>
+        <div class="plan-perks">
+          <div class="plan-perk"><i class="ti ti-check"></i> Refillable glass bottle</div>
+          <div class="plan-perk"><i class="ti ti-check"></i> 30ml custom serum</div>
+          <div class="plan-perk"><i class="ti ti-x" style="color:#ddd;"></i><span style="color:#bbb;">No refill discount</span></div>
+        </div>
+      </div>
+
+      <div class="plan-card featured">
+        <div class="plan-badge">Best value</div>
+        <p class="plan-name">Monthly subscription</p>
+        <p class="plan-desc">Auto-refill · save 15% every month</p>
+        <p class="plan-price green">$19<span>.00 / mo</span></p>
+        <div class="plan-perks">
+          <div class="plan-perk"><i class="ti ti-check"></i> Auto refill every 30 days</div>
+          <div class="plan-perk"><i class="ti ti-check"></i> Re-scan before each order</div>
+          <div class="plan-perk"><i class="ti ti-check"></i> Free carbon-neutral shipping</div>
+          <div class="plan-perk"><i class="ti ti-check"></i> Loyalty rewards & points</div>
+        </div>
+      </div>
+    </div>
+    <div class="order-footer">
+      <button class="btn-primary">
+        <i class="ti ti-shopping-cart"></i> Subscribe & Save $13/mo
+      </button>
+      <button class="btn-outline">Buy once — $32.00</button>
+    </div>
+  </div>
+
+  <!-- ── PROFILE ── -->
+  <div id="screen-profile" class="screen">
+    <div class="profile-header">
+      <div class="avatar"><i class="ti ti-user"></i></div>
+      <p class="profile-name-text">Dania Sofea</p>
+      <p class="profile-tag-text">GlowSphere Member · Pro Plan</p>
+      <div class="profile-stats-row">
+        <div class="pstat">
+          <p class="pstat-n">74</p>
+          <p class="pstat-l">Skin score</p>
+        </div>
+        <div class="pstat">
+          <p class="pstat-n">3</p>
+          <p class="pstat-l">Scans done</p>
+        </div>
+        <div class="pstat">
+          <p class="pstat-n">+8</p>
+          <p class="pstat-l">Improvement</p>
+        </div>
+      </div>
+    </div>
+    <div class="profile-scroll">
+      <div class="card profile-card">
+        <p class="progress-title">Skin score history</p>
+        <div class="progress-chart">
+          <div class="pc-bar" style="height:38%;"></div>
+          <div class="pc-bar" style="height:52%;"></div>
+          <div class="pc-bar" style="height:60%;"></div>
+          <div class="pc-bar" style="height:56%;"></div>
+          <div class="pc-bar" style="height:70%;"></div>
+          <div class="pc-bar hi" style="height:86%;"></div>
+        </div>
+        <div class="progress-weeks">
+          <span class="pw">W1</span><span class="pw">W2</span><span class="pw">W3</span>
+          <span class="pw">W4</span><span class="pw">W5</span><span class="pw">Now</span>
+        </div>
+      </div>
+
+      <p class="section-hd">Account</p>
+      <div class="card">
+        <div class="menu-list">
+          <div class="menu-row">
+            <i class="ti ti-flask menu-icon"></i>
+            <span class="menu-label">Formula history</span>
+            <i class="ti ti-chevron-right menu-arrow"></i>
+          </div>
+          <div class="menu-row">
+            <i class="ti ti-refresh menu-icon"></i>
+            <span class="menu-label">Subscription & refills</span>
+            <i class="ti ti-chevron-right menu-arrow"></i>
+          </div>
+          <div class="menu-row">
+            <i class="ti ti-leaf menu-icon"></i>
+            <span class="menu-label">My eco impact</span>
+            <i class="ti ti-chevron-right menu-arrow"></i>
+          </div>
+          <div class="menu-row">
+            <i class="ti ti-trophy menu-icon"></i>
+            <span class="menu-label">Loyalty rewards</span>
+            <i class="ti ti-chevron-right menu-arrow"></i>
+          </div>
+          <div class="menu-row">
+            <i class="ti ti-settings menu-icon"></i>
+            <span class="menu-label">Settings</span>
+            <i class="ti ti-chevron-right menu-arrow"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BOTTOM NAV ── -->
+  <nav id="bottom-nav">
+    <div class="nav-item active" id="nav-scan" onclick="navigate('scan')">
+      <i class="ti ti-home"></i>
+      <span class="nav-label">Home</span>
+    </div>
+    <div class="nav-item" id="nav-results" onclick="navigate('results')">
+      <i class="ti ti-chart-bar"></i>
+      <span class="nav-label">Results</span>
+    </div>
+    <div class="nav-scan" onclick="navigate('scan')">
+      <i class="ti ti-scan"></i>
+    </div>
+    <div class="nav-item" id="nav-order" onclick="navigate('order')">
+      <i class="ti ti-shopping-bag"></i>
+      <span class="nav-label">Shop</span>
+    </div>
+    <div class="nav-item" id="nav-profile" onclick="navigate('profile')">
+      <i class="ti ti-user"></i>
+      <span class="nav-label">Profile</span>
+    </div>
+  </nav>
+
+  <!-- Modal for Product Details -->
+  <div id="product-modal" class="modal-overlay" onclick="closeProductModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeProductModal()">&times;</button>
+      <div class="modal-img-wrapper">
+        <img id="modal-product-img" src="" alt="">
+        <i id="modal-product-icon" class="ti"></i>
+      </div>
+      <span id="modal-product-step" class="product-step">Cleanse</span>
+      <h3 id="modal-product-name">Product Name</h3>
+      <p id="modal-product-brand">Brand Info</p>
+      <div class="modal-divider"></div>
+      <p class="modal-section-title">How to Use</p>
+      <p id="modal-product-use" class="modal-text">Directions of use...</p>
+      <p class="modal-section-title">Key Benefit</p>
+      <p id="modal-product-benefit" class="modal-text">Key benefit...</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
+let streamInstance = null;
+
+async function startCamera() {
+  const video = document.getElementById('webcam');
+  const icon = document.querySelector('.scan-icon');
+  if (!video) return;
+  
+  if (streamInstance) return;
+
+  try {
+    const constraints = {
+      video: {
+        facingMode: 'user',
+        width: { ideal: 640 },
+        height: { ideal: 480 }
+      },
+      audio: false
+    };
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    streamInstance = stream;
+    video.srcObject = stream;
+    video.classList.add('active');
+    if (icon) icon.style.opacity = '0';
+  } catch (err) {
+    console.warn("Camera access failed or denied: ", err);
+    if (icon) icon.style.opacity = '0.4';
+    video.classList.remove('active');
+  }
+}
+
+function stopCamera() {
+  if (streamInstance) {
+    streamInstance.getTracks().forEach(track => track.stop());
+    streamInstance = null;
+  }
+  const video = document.getElementById('webcam');
+  const icon = document.querySelector('.scan-icon');
+  if (video) {
+    video.srcObject = null;
+    video.classList.remove('active');
+  }
+  if (icon) icon.style.opacity = '0.4';
+}
+
+function triggerScan() {
+  const btn = document.querySelector('#screen-scan .btn-primary');
+  const hint = document.querySelector('.scan-hint');
+  const line = document.querySelector('.scan-line');
+  const title = document.querySelector('.scan-title');
+  const sub = document.querySelector('.scan-sub');
+  
+  if (!btn || btn.disabled) return;
+  
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader rotate-anim"></i> Scanning...';
+  title.textContent = "Analyzing Skin...";
+  sub.textContent = "Please hold still, AI is analyzing your face";
+  
+  if (line) {
+    line.style.animationDuration = '0.8s';
+  }
+  
+  const steps = [
+    "Detecting skin type...",
+    "Analyzing sebum levels...",
+    "Measuring hydration...",
+    "Calculating skin score..."
+  ];
+  
+  let currentStep = 0;
+  const interval = setInterval(() => {
+    if (hint) hint.textContent = steps[currentStep];
+    currentStep++;
+    if (currentStep >= steps.length) {
+      clearInterval(interval);
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ti ti-scan"></i> Start AI Scan';
+        title.textContent = "AI Skin Scanner";
+        sub.textContent = "Position your face within the frame";
+        if (hint) hint.textContent = "Keep still · good lighting · face forward";
+        if (line) line.style.animationDuration = '2s';
+        
+        navigate('results');
+      }, 500);
+    }
+  }, 600);
+}
+
+setTimeout(() => {
+  document.getElementById('splash').classList.add('hide');
+  setTimeout(() => {
+    document.getElementById('splash').remove();
+    startCamera();
+  }, 600);
+}, 1500);
+
+function updateTime() {
+  const now = new Date();
+  const t = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  document.querySelectorAll('.status-time').forEach(el => el.textContent = t);
+}
+updateTime();
+setInterval(updateTime, 10000);
+
+const screens = ['scan','results','formula','order','profile'];
+const navMap = { scan: 'nav-scan', results: 'nav-results', formula: null, order: 'nav-order', profile: 'nav-profile' };
+
+function navigate(to) {
+  screens.forEach(s => {
+    document.getElementById('screen-' + s).classList.toggle('active', s === to);
+  });
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  if (navMap[to]) {
+    const navEl = document.getElementById(navMap[to]);
+    if (navEl) navEl.classList.add('active');
+  }
+  
+  if (to === 'scan') {
+    startCamera();
+  } else {
+    stopCamera();
+  }
+}
+
+function switchRecTab(tab) {
+  document.querySelectorAll('.rec-tab').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.rec-products-container').forEach(el => el.classList.remove('active'));
+  
+  if (tab === 'morning') {
+    document.getElementById('tab-morning').classList.add('active');
+    document.getElementById('rec-morning').classList.add('active');
+  } else if (tab === 'night') {
+    document.getElementById('tab-night').classList.add('active');
+    document.getElementById('rec-night').classList.add('active');
+  }
+}
+
+const productData = {
+  sc01: {
+    name: 'Gentle Gel Cleanser',
+    brand: 'pH Balancing',
+    step: 'Cleanse',
+    icon: 'ti-droplet',
+    use: 'Apply a small amount to damp face. Massage gently in circular motions, then rinse thoroughly with lukewarm water.',
+    benefit: 'Gently cleanses excess sebum and unclogs pores without stripping your skin\'s natural moisture barrier, perfect for oily T-zones.'
+  },
+  sc02: {
+    name: 'Hydrating Essence Toner',
+    brand: 'Deep Moisture',
+    step: 'Hydrate',
+    icon: 'ti-droplet',
+    use: 'Pour 3-4 drops onto your palms and gently press onto clean face and neck until fully absorbed.',
+    benefit: 'Deeply hydrates and balances the skin pH, reducing dryness in dehydrated areas and preparing the skin for serum absorption.'
+  },
+  sc03: {
+    name: '10% Niacinamide Serum',
+    brand: 'Brightening Boost',
+    step: 'Treat',
+    icon: 'ti-flask',
+    use: 'Apply 2-3 drops to entire face after toning. Focus on oily areas or spots. Use daily.',
+    benefit: 'Effectively controls sebum production, minimizes pore appearance, and fades post-acne dark spots for an even skin tone.'
+  },
+  sc04: {
+    name: 'Centella Soothing Moisturizer',
+    brand: 'Calm & Repair',
+    step: 'Moisturize',
+    icon: 'ti-sparkles',
+    use: 'Apply an even layer over the face and neck as the last step in your routine (before sunscreen).',
+    benefit: 'Soothes redness, calms active sensitivity, and strengthens the skin barrier with a weightless, non-greasy finish.'
+  },
+  sc05: {
+    name: 'SPF 50+ UV Defense Sunscreen',
+    brand: 'Matte Finish',
+    step: 'Protect',
+    icon: 'ti-sun',
+    use: 'Apply generously (two-finger rule) onto face and neck 15 minutes before sun exposure. Reapply every 2 hours.',
+    benefit: 'High UV protection with a matte, lightweight finish. Controls shine and prevents UV-induced skin damage.'
+  },
+  sc06: {
+    name: 'Purifying Cleansing Oil',
+    brand: 'Melt Makeup & Sebum',
+    step: 'Double Cleanse',
+    icon: 'ti-leaf',
+    use: 'Massage onto dry skin to dissolve sunscreen and makeup. Add water to emulsify, then rinse off completely.',
+    benefit: 'The first step of double cleansing. Efficiently melts oil-based impurities and unclogs stubborn pores without drying.'
+  },
+  sc07: {
+    name: '2% BHA Pore Clarifying Liquid',
+    brand: 'Pore Clarifying',
+    step: 'Exfoliate',
+    icon: 'ti-flask',
+    use: 'Apply with a cotton pad or fingers over face after cleansing. Use 2-3 times a week at night.',
+    benefit: 'Exfoliates deep inside the pore lining. Targets blackheads, whiteheads, and prevents future breakouts.'
+  },
+  sc08: {
+    name: '0.5% Bakuchiol Renewal Serum',
+    brand: 'Gentle Renewal',
+    step: 'Target Repair',
+    icon: 'ti-activity',
+    use: 'Apply 2-3 drops to face and neck after toning/exfoliating. Gently tap until absorbed.',
+    benefit: 'A plant-derived, gentle alternative to retinol. Boosts skin cell turnover and refines skin texture without irritation.'
+  },
+  sc09: {
+    name: 'Peptide Revitalizing Eye Cream',
+    brand: 'Firming Care',
+    step: 'Eye Care',
+    icon: 'ti-sparkles',
+    use: 'Dab a tiny amount around the orbital bone and gently tap with your ring finger.',
+    benefit: 'Plumps fine lines, reduces under-eye puffiness, and strengthens the delicate skin barrier around the eyes.'
+  },
+  sc10: {
+    name: 'Ceramide Night Barrier Cream',
+    brand: 'Overnight Recovery',
+    step: 'Nourish',
+    icon: 'ti-moon',
+    use: 'Smooth a generous amount over face and neck as the final step of your nighttime routine.',
+    benefit: 'Rich in essential ceramides to repair and fortify the skin barrier overnight, locking in moisture for a plump morning glow.'
+  }
+};
+
+function showProductDetails(id) {
+  const data = productData[id];
+  if (!data) return;
+  
+  const modal = document.getElementById('product-modal');
+  const imgEl = document.getElementById('modal-product-img');
+  const iconEl = document.getElementById('modal-product-icon');
+  
+  // Set text contents
+  document.getElementById('modal-product-step').textContent = data.step;
+  document.getElementById('modal-product-name').textContent = data.name;
+  document.getElementById('modal-product-brand').textContent = data.brand;
+  document.getElementById('modal-product-use').textContent = data.use;
+  document.getElementById('modal-product-benefit').textContent = data.benefit;
+  
+  // Set image & icon class
+  imgEl.src = id + '.png';
+  imgEl.alt = data.name;
+  imgEl.className = ''; // remove loaded class
+  
+  // Try loading image
+  const tempImg = new Image();
+  tempImg.src = id + '.png';
+  tempImg.onload = () => {
+    imgEl.classList.add('loaded');
+  };
+  tempImg.onerror = () => {
+    imgEl.classList.remove('loaded');
+  };
+  
+  // Set placeholder icon class
+  iconEl.className = 'ti ' + data.icon + ' modal-placeholder-icon';
+  
+  modal.classList.add('active');
+}
+
+function closeProductModal() {
+  document.getElementById('product-modal').classList.remove('active');
+}
+</script>
+</body>
+</html>
