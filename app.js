@@ -10,8 +10,17 @@ async function startCamera() {
   const video = document.getElementById('webcam');
   const icon = document.querySelector('.scan-icon');
   if (!video) return;
-  
-  if (streamInstance) return;
+
+  // Stream already exists — just re-attach and resume (no permission re-prompt)
+  if (streamInstance) {
+    if (video.srcObject !== streamInstance) {
+      video.srcObject = streamInstance;
+    }
+    video.play().catch(() => {});
+    video.classList.add('active');
+    if (icon) icon.style.opacity = '0';
+    return;
+  }
 
   try {
     const constraints = {
@@ -35,17 +44,15 @@ async function startCamera() {
 }
 
 function stopCamera() {
-  if (streamInstance) {
-    streamInstance.getTracks().forEach(track => track.stop());
-    streamInstance = null;
-  }
+  // Only pause + hide — keep stream alive so permission isn't re-requested
   const video = document.getElementById('webcam');
   const icon = document.querySelector('.scan-icon');
   if (video) {
-    video.srcObject = null;
+    video.pause();
     video.classList.remove('active');
   }
   if (icon) icon.style.opacity = '0.4';
+  // streamInstance is intentionally kept alive
 }
 
 function triggerScan() {
