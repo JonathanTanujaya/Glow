@@ -53,6 +53,7 @@
     </div>
     <div class="scan-body">
       <div class="scan-labels">
+        <p class="scan-greeting" id="scan-greeting"></p>
         <p class="scan-title">AI Skin Scanner</p>
         <p class="scan-sub">Position your face within the frame</p>
       </div>
@@ -84,6 +85,33 @@
         <i class="ti ti-scan"></i> Start AI Scan
       </button>
     </div>
+
+    <!-- Scan Loading Overlay -->
+    <div id="scan-loading-overlay" class="scan-overlay">
+      <div class="scan-overlay-bg"></div>
+      <div class="scan-overlay-content">
+        <div class="scan-progress-ring">
+          <svg viewBox="0 0 120 120">
+            <defs>
+              <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#5DCAA5"/>
+                <stop offset="100%" stop-color="#1D9E75"/>
+              </linearGradient>
+            </defs>
+            <circle class="progress-bg" cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="6"/>
+            <circle class="progress-fill" cx="60" cy="60" r="52" fill="none" stroke="url(#progressGrad)" stroke-width="6" stroke-linecap="round" stroke-dasharray="326.73" stroke-dashoffset="326.73"/>
+          </svg>
+          <span class="progress-pct" id="scan-progress-pct">0%</span>
+        </div>
+        <p class="scan-overlay-title" id="scan-overlay-title">Analyzing your skin...</p>
+        <p class="scan-overlay-step" id="scan-overlay-step">Initializing AI scanner</p>
+        <div class="shimmer-preview">
+          <div class="shimmer-card"></div>
+          <div class="shimmer-card short"></div>
+          <div class="shimmer-card tall"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ── RESULTS ── -->
@@ -96,10 +124,49 @@
         <i class="ti ti-battery-2"></i>
       </span>
     </div>
-    <div class="results-scroll">
-      <div class="results-header">
-        <p class="results-title">Skin Analysis</p>
-        <p class="results-sub">Based on your real-time facial scan</p>
+    <!-- Empty State -->
+    <div class="empty-state" id="results-empty">
+      <div class="empty-state-icon-wrap">
+        <i class="ti ti-scan empty-state-icon"></i>
+        <div class="empty-state-glow"></div>
+      </div>
+      <p class="empty-state-title">No scan results yet</p>
+      <p class="empty-state-sub">Complete your first AI skin scan to unlock your personalized skin report</p>
+      <button class="btn-primary empty-state-cta" onclick="navigate('scan')">
+        <i class="ti ti-scan"></i> Start Your First Scan
+      </button>
+    </div>
+
+    <div class="results-scroll" id="results-scroll">
+      <!-- Hero Section -->
+      <div class="results-hero">
+        <div class="hero-bg-anim">
+          <div class="blob blob-1"></div>
+          <div class="blob blob-2"></div>
+        </div>
+        <div class="results-hero-glass">
+          <div class="hero-badge-wrap">
+            <div class="hero-badge-new">
+              <i class="ti ti-sparkles"></i>
+              <span>Analysis Complete</span>
+            </div>
+          </div>
+          <p class="results-title">Your Skin, Decoded</p>
+          <p class="results-sub">Personalized insights based on your face scan</p>
+        </div>
+      </div>
+
+      <!-- Skin Mood Strip -->
+      <div class="skin-mood-strip">
+        <div class="mood-indicator">
+          <span class="mood-dot"></span>
+          <span class="mood-emoji">💧</span>
+        </div>
+        <div class="mood-text">
+          <p class="mood-label">Today's Skin Mood</p>
+          <p class="mood-value">Slightly Dehydrated · Oily T-Zone</p>
+        </div>
+        <i class="ti ti-chevron-right mood-arrow"></i>
       </div>
 
       <div class="card">
@@ -113,6 +180,56 @@
             <p class="score-desc">Oily T-zone with mild dehydration. Your personalized formula is ready.</p>
           </div>
         </div>
+      </div>
+
+      <!-- Insight Score Cards -->
+      <div class="insight-cards-grid">
+        <div class="insight-card insight-card--green">
+          <div class="insight-icon-wrap" style="background: rgba(93,202,165,0.12); color: #5DCAA5;">
+            <i class="ti ti-droplet"></i>
+          </div>
+          <p class="insight-label">Hydration</p>
+          <p class="insight-score">35<span>%</span></p>
+          <span class="insight-tag tag-warning">Low</span>
+        </div>
+        <div class="insight-card insight-card--amber">
+          <div class="insight-icon-wrap" style="background: rgba(250,199,117,0.12); color: #FAC775;">
+            <i class="ti ti-sun"></i>
+          </div>
+          <p class="insight-label">Glow Level</p>
+          <p class="insight-score">62<span>%</span></p>
+          <span class="insight-tag tag-fair">Fair</span>
+        </div>
+        <div class="insight-card insight-card--red">
+          <div class="insight-icon-wrap" style="background: rgba(226,75,74,0.10); color: #E24B4A;">
+            <i class="ti ti-flame"></i>
+          </div>
+          <p class="insight-label">Acne Risk</p>
+          <p class="insight-score">45<span>%</span></p>
+          <span class="insight-tag tag-warning">Medium</span>
+        </div>
+        <div class="insight-card insight-card--blue">
+          <div class="insight-icon-wrap" style="background: rgba(55,138,221,0.10); color: #378ADD;">
+            <i class="ti ti-grain"></i>
+          </div>
+          <p class="insight-label">Texture</p>
+          <p class="insight-score">71<span>%</span></p>
+          <span class="insight-tag tag-good">Good</span>
+        </div>
+      </div>
+
+      <!-- Daily Routine Strip -->
+      <div class="daily-routine-strip">
+        <div class="routine-dots">
+          <span class="routine-dot done"></span>
+          <span class="routine-dot done"></span>
+          <span class="routine-dot"></span>
+        </div>
+        <div class="routine-text">
+          <p class="routine-label">Recommended Routine</p>
+          <p class="routine-value">5-step morning · 5-step night</p>
+        </div>
+        <span class="routine-arrow"><i class="ti ti-arrow-down"></i></span>
       </div>
 
       <div class="card">
@@ -273,9 +390,28 @@
       </span>
     </div>
     <div class="formula-scroll">
-      <div class="formula-header">
-        <p class="formula-title">Your Formula</p>
-        <p class="formula-sub">Personalized for your skin today</p>
+      <div class="formula-hero">
+        <div class="formula-hero-bg"></div>
+        <div class="formula-hero-content">
+          <span class="hero-badge"><i class="ti ti-flask"></i> Custom Blend</span>
+          <p class="formula-title">Crafted Just for You</p>
+          <p class="formula-sub">5 active ingredients, personalized concentrations</p>
+          <div class="formula-hero-meta" aria-label="Formula highlights">
+            <span class="formula-meta-pill"><i class="ti ti-shield-check"></i> Derm-tested</span>
+            <span class="formula-meta-pill"><i class="ti ti-clock-hour-4"></i> Blended in 48h</span>
+            <span class="formula-meta-pill"><i class="ti ti-droplet"></i> pH-balanced</span>
+          </div>
+        </div>
+        <div class="formula-hero-note">
+          Matched to your latest scan and packaged in a refill-ready glass bottle.
+        </div>
+        <div class="formula-hero-bubbles">
+          <span class="hero-bubble" style="--delay: 0s; --size: 8px; --left: 15%;"></span>
+          <span class="hero-bubble" style="--delay: 0.5s; --size: 12px; --left: 45%;"></span>
+          <span class="hero-bubble" style="--delay: 1s; --size: 6px; --left: 75%;"></span>
+          <span class="hero-bubble" style="--delay: 1.5s; --size: 10px; --left: 30%;"></span>
+          <span class="hero-bubble" style="--delay: 0.8s; --size: 7px; --left: 60%;"></span>
+        </div>
       </div>
 
       <div class="card">
@@ -420,6 +556,43 @@
         <div class="progress-weeks">
           <span class="pw">W1</span><span class="pw">W2</span><span class="pw">W3</span>
           <span class="pw">W4</span><span class="pw">W5</span><span class="pw">Now</span>
+        </div>
+      </div>
+
+      <!-- Before-After Comparison -->
+      <div class="card profile-card">
+        <p class="progress-title">Your Progress</p>
+        <div class="comparison-module">
+          <div class="comparison-card before">
+            <p class="comparison-period">4 Weeks Ago</p>
+            <p class="comparison-score">66</p>
+            <p class="comparison-label">Skin Score</p>
+          </div>
+          <div class="comparison-connector">
+            <div class="connector-line"></div>
+            <div class="improvement-badge">
+              <i class="ti ti-trending-up"></i> +8
+            </div>
+          </div>
+          <div class="comparison-card after">
+            <p class="comparison-period">Today</p>
+            <p class="comparison-score">74</p>
+            <p class="comparison-label">Skin Score</p>
+          </div>
+        </div>
+        <div class="comparison-details">
+          <div class="comparison-detail">
+            <span class="detail-name">Hydration</span>
+            <span class="detail-delta positive"><i class="ti ti-arrow-up"></i> +12%</span>
+          </div>
+          <div class="comparison-detail">
+            <span class="detail-name">Oiliness</span>
+            <span class="detail-delta positive"><i class="ti ti-arrow-down"></i> -15%</span>
+          </div>
+          <div class="comparison-detail">
+            <span class="detail-name">Sensitivity</span>
+            <span class="detail-delta positive"><i class="ti ti-arrow-down"></i> -8%</span>
+          </div>
         </div>
       </div>
 

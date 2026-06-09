@@ -5,6 +5,7 @@ if ('serviceWorker' in navigator) {
 }
 
 let streamInstance = null;
+let hasScanned = false;
 
 async function startCamera() {
   const video = document.getElementById('webcam');
@@ -57,47 +58,72 @@ function stopCamera() {
 
 function triggerScan() {
   const btn = document.querySelector('#screen-scan .btn-primary');
-  const hint = document.querySelector('.scan-hint');
-  const line = document.querySelector('.scan-line');
-  const title = document.querySelector('.scan-title');
-  const sub = document.querySelector('.scan-sub');
-  
+  const scanLine = document.querySelector('.scan-line');
   if (!btn || btn.disabled) return;
-  
   btn.disabled = true;
   btn.innerHTML = '<i class="ti ti-loader rotate-anim"></i> Scanning...';
-  title.textContent = "Analyzing Skin...";
-  sub.textContent = "Please hold still, AI is analyzing your face";
-  
-  if (line) {
-    line.style.animationDuration = '0.8s';
-  }
-  
+
+  const scanTitle = document.querySelector('.scan-title');
+  const scanSub = document.querySelector('.scan-sub');
+  const hint = document.querySelector('.scan-hint');
+  if (scanTitle) scanTitle.textContent = 'Analyzing Skin...';
+  if (scanSub) scanSub.textContent = 'Please hold still';
+  if (scanLine) scanLine.style.animationDuration = '0.8s';
+
+  const overlay = document.getElementById('scan-loading-overlay');
+  const progressFill = overlay.querySelector('.progress-fill');
+  const pctText = document.getElementById('scan-progress-pct');
+  const titleText = document.getElementById('scan-overlay-title');
+  const stepText = document.getElementById('scan-overlay-step');
+
+  overlay.classList.add('active');
+
+  const circumference = 2 * Math.PI * 52;
   const steps = [
-    "Detecting skin type...",
-    "Analyzing sebum levels...",
-    "Measuring hydration...",
-    "Calculating skin score..."
+    { pct: 12, title: 'Analyzing your skin...', step: 'Detecting skin type' },
+    { pct: 28, title: 'Analyzing your skin...', step: 'Analyzing sebum levels' },
+    { pct: 45, title: 'Analyzing your skin...', step: 'Measuring hydration' },
+    { pct: 62, title: 'Processing data...', step: 'Mapping pore density' },
+    { pct: 78, title: 'Processing data...', step: 'Assessing sensitivity' },
+    { pct: 92, title: 'Almost done...', step: 'Calculating skin score' },
+    { pct: 100, title: 'Analysis complete!', step: 'Your results are ready' }
   ];
-  
-  let currentStep = 0;
+
+  let stepIdx = 0;
   const interval = setInterval(() => {
-    if (hint) hint.textContent = steps[currentStep];
-    currentStep++;
-    if (currentStep >= steps.length) {
+    if (stepIdx >= steps.length) {
       clearInterval(interval);
       setTimeout(() => {
+        overlay.classList.remove('active');
         btn.disabled = false;
         btn.innerHTML = '<i class="ti ti-scan"></i> Start AI Scan';
-        title.textContent = "AI Skin Scanner";
-        sub.textContent = "Position your face within the frame";
-        if (hint) hint.textContent = "Keep still · good lighting · face forward";
-        if (line) line.style.animationDuration = '2s';
-        
+        if (scanTitle) scanTitle.textContent = 'AI Skin Scanner';
+        if (scanSub) scanSub.textContent = 'Position your face within the frame';
+        if (hint) hint.textContent = 'Keep still \u00b7 good lighting \u00b7 face forward';
+        if (scanLine) scanLine.style.animationDuration = '2s';
+
+        // Reset overlay for next scan
+        setTimeout(() => {
+          progressFill.style.strokeDashoffset = circumference;
+          pctText.textContent = '0%';
+          titleText.textContent = 'Analyzing your skin...';
+          stepText.textContent = 'Initializing AI scanner';
+        }, 400);
+
+        hasScanned = true;
+        updateResultsVisibility();
         navigate('results');
-      }, 500);
+      }, 800);
+      return;
     }
-  }, 600);
+    const s = steps[stepIdx];
+    const offset = circumference - (s.pct / 100) * circumference;
+    progressFill.style.strokeDashoffset = offset;
+    pctText.textContent = s.pct + '%';
+    titleText.textContent = s.title;
+    stepText.textContent = s.step;
+    stepIdx++;
+  }, 450);
 }
 
 let isResizing = false;
@@ -221,6 +247,8 @@ setTimeout(() => {
   setTimeout(() => {
     document.getElementById('splash').remove();
     startCamera();
+    updateGreeting();
+    updateResultsVisibility();
   }, 600);
 }, 1500);
 
@@ -244,11 +272,16 @@ function navigate(to) {
     const navEl = document.getElementById(navMap[to]);
     if (navEl) navEl.classList.add('active');
   }
-  
+
   if (to === 'scan') {
     startCamera();
   } else {
     stopCamera();
+  }
+
+  // Animate results entry
+  if (to === 'results' && hasScanned) {
+    setTimeout(animateResultsEntry, 400);
   }
 
   // Keep desktop panel in sync
@@ -501,3 +534,80 @@ function dpNav(screen) {
   navigate(screen);
   updateDesktopPanel(screen);
 }
+
+/* ────────────────────────────
+   GREETING
+──────────────────────────── */
+function updateGreeting() {
+  const hour = new Date().getHours();
+  let greeting = 'Good morning';
+  if (hour >= 12 && hour < 17) greeting = 'Good afternoon';
+  else if (hour >= 17) greeting = 'Good evening';
+  const el = document.getElementById('scan-greeting');
+  if (el) el.textContent = greeting + ', Dania ✨';
+}
+
+/* ────────────────────────────
+   EMPTY STATE MANAGEMENT
+──────────────────────────── */
+function updateResultsVisibility() {
+  const screen = document.getElementById('screen-results');
+  if (screen) screen.classList.toggle('has-results', hasScanned);
+}
+
+/* ────────────────────────────
+   RESULTS ENTRY ANIMATION
+──────────────────────────── */
+function animateResultsEntry() {
+  // Stagger insight cards
+  const cards = document.querySelectorAll('.insight-card');
+  cards.forEach((card, i) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(16px) scale(0.96)';
+    setTimeout(() => {
+      card.style.transition = 'opacity 0.5s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0) scale(1)';
+    }, 80 + i * 100);
+  });
+
+  // Animate bar fills
+  const bars = document.querySelectorAll('#screen-results .bar-fill');
+  bars.forEach((bar, i) => {
+    const target = bar.getAttribute('data-width') || bar.style.width;
+    if (!bar.getAttribute('data-width')) {
+      bar.setAttribute('data-width', bar.style.width);
+    }
+    bar.style.transition = 'none';
+    bar.style.width = '0%';
+    setTimeout(() => {
+      bar.style.transition = 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+      bar.style.width = target;
+    }, 300 + i * 120);
+  });
+
+  // Animate score ring
+  const ring = document.querySelector('#screen-results .score-ring');
+  if (ring) {
+    ring.style.animation = 'none';
+    ring.offsetHeight; // force reflow
+    ring.style.animation = 'ringPop 0.6s 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) both';
+  }
+}
+
+/* ────────────────────────────
+   RIPPLE EFFECT
+──────────────────────────── */
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('.btn-primary');
+  if (!btn) return;
+  const ripple = document.createElement('span');
+  ripple.classList.add('ripple');
+  const rect = btn.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  ripple.style.width = ripple.style.height = size + 'px';
+  ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+  ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+  btn.appendChild(ripple);
+  ripple.addEventListener('animationend', () => ripple.remove());
+});
