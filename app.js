@@ -7,6 +7,195 @@ if ('serviceWorker' in navigator) {
 let streamInstance = null;
 let hasScanned = false;
 
+const PRODUCTS = Object.freeze({
+  'sc01': { name: 'Gentle Gel Cleanser', icon: 'ti-droplet', img: 'sc01.png' },
+  'sc02': { name: 'Hydrating Essence', icon: 'ti-droplet', img: 'sc02.png' },
+  'sc03': { name: 'Niacinamide Serum', icon: 'ti-flask', img: 'sc03.png' },
+  'sc04': { name: 'Soothing Cream', icon: 'ti-sparkles', img: 'sc04.png' },
+  'sc05': { name: 'UV Defense SPF 50+', icon: 'ti-sun', img: 'sc05.png' },
+  'sc06': { name: 'Cleansing Oil', icon: 'ti-leaf', img: 'sc06.png' },
+  'sc07': { name: 'BHA Pore Liquid', icon: 'ti-flask', img: 'sc07.png' },
+  'sc08': { name: 'Bakuchiol Serum', icon: 'ti-activity', img: 'sc08.png' },
+  'sc09': { name: 'Peptide Eye Cream', icon: 'ti-sparkles', img: 'sc09.png' },
+  'sc10': { name: 'Barrier Repair Cream', icon: 'ti-shield', img: 'sc10.png' },
+});
+
+const SCAN_SCENARIOS = Object.freeze({
+  'dehydrated_oily': {
+    mood: { emoji: '💧', text: 'Slightly Dehydrated · Oily T-Zone' },
+    score: { num: 74, grade: 'Good condition', desc: 'Oily T-zone with mild dehydration. Your personalized formula is ready.' },
+    insights: {
+      hyd:  { val: 35, tag: 'Low',    tagClass: 'tag-warning', colorClass: 'insight-card--green' },
+      glow: { val: 62, tag: 'Fair',   tagClass: 'tag-fair',    colorClass: 'insight-card--amber' },
+      acne: { val: 45, tag: 'Medium', tagClass: 'tag-warning', colorClass: 'insight-card--red' },
+      tex:  { val: 71, tag: 'Good',   tagClass: 'tag-good',    colorClass: 'insight-card--blue' }
+    },
+    conditions: {
+      oil:  { val: 70, text: 'High', color: '#0F6E56', bg: '#1D9E75' },
+      hyd:  { val: 35, text: 'Low',  color: '#BA7517', bg: '#FAC775' },
+      sen:  { val: 28, text: 'Mild', color: '#0F6E56', bg: '#5DCAA5' },
+      acne: { val: 45, text: 'Med',  color: '#A32D2D', bg: '#E24B4A' },
+      line: { val: 18, text: 'Low',  color: '#185FA5', bg: '#85B7EB' }
+    },
+    routine: '5-step morning · 5-step night',
+    products: {
+      morning: ['sc01', 'sc02', 'sc03', 'sc04', 'sc05'],
+      night: ['sc06', 'sc07', 'sc08', 'sc09', 'sc10']
+    }
+  },
+  'acne_prone': {
+    mood: { emoji: '🔥', text: 'Active Breakouts · High Sebum' },
+    score: { num: 58, grade: 'Needs Attention', desc: 'Active breakouts detected. Focus on calming and barrier repair.' },
+    insights: {
+      hyd:  { val: 55, tag: 'Fair',   tagClass: 'tag-fair',    colorClass: 'insight-card--green' },
+      glow: { val: 40, tag: 'Low',    tagClass: 'tag-warning', colorClass: 'insight-card--amber' },
+      acne: { val: 85, tag: 'High',   tagClass: 'tag-warning', colorClass: 'insight-card--red' },
+      tex:  { val: 55, tag: 'Fair',   tagClass: 'tag-fair',    colorClass: 'insight-card--blue' }
+    },
+    conditions: {
+      oil:  { val: 80, text: 'High', color: '#0F6E56', bg: '#1D9E75' },
+      hyd:  { val: 55, text: 'Fair', color: '#BA7517', bg: '#FAC775' },
+      sen:  { val: 65, text: 'Med',  color: '#A32D2D', bg: '#E24B4A' },
+      acne: { val: 85, text: 'High', color: '#A32D2D', bg: '#E24B4A' },
+      line: { val: 10, text: 'Low',  color: '#185FA5', bg: '#85B7EB' }
+    },
+    routine: '3-step morning · 4-step night',
+    products: {
+      morning: ['sc01', 'sc03', 'sc05'],
+      night: ['sc06', 'sc07', 'sc04', 'sc10']
+    }
+  },
+  'sensitive_barrier': {
+    mood: { emoji: '🛡️', text: 'Compromised Barrier · Redness' },
+    score: { num: 62, grade: 'Needs TLC', desc: 'Skin barrier is compromised. Recommend skipping exfoliants.' },
+    insights: {
+      hyd:  { val: 40, tag: 'Low',    tagClass: 'tag-warning', colorClass: 'insight-card--green' },
+      glow: { val: 50, tag: 'Fair',   tagClass: 'tag-fair',    colorClass: 'insight-card--amber' },
+      acne: { val: 20, tag: 'Low',    tagClass: 'tag-good',    colorClass: 'insight-card--red' },
+      tex:  { val: 60, tag: 'Fair',   tagClass: 'tag-fair',    colorClass: 'insight-card--blue' }
+    },
+    conditions: {
+      oil:  { val: 30, text: 'Low',  color: '#185FA5', bg: '#85B7EB' },
+      hyd:  { val: 40, text: 'Low',  color: '#BA7517', bg: '#FAC775' },
+      sen:  { val: 90, text: 'High', color: '#A32D2D', bg: '#E24B4A' },
+      acne: { val: 20, text: 'Low',  color: '#0F6E56', bg: '#1D9E75' },
+      line: { val: 25, text: 'Mild', color: '#BA7517', bg: '#FAC775' }
+    },
+    routine: '3-step morning · 3-step night',
+    products: {
+      morning: ['sc01', 'sc04', 'sc05'],
+      night: ['sc06', 'sc04', 'sc10']
+    }
+  },
+  'dull_low_glow': {
+    mood: { emoji: '☁️', text: 'Dullness · Uneven Tone' },
+    score: { num: 68, grade: 'Fair condition', desc: 'Dullness detected. Brightening actives will help restore radiance.' },
+    insights: {
+      hyd:  { val: 65, tag: 'Good',   tagClass: 'tag-good',    colorClass: 'insight-card--green' },
+      glow: { val: 30, tag: 'Low',    tagClass: 'tag-warning', colorClass: 'insight-card--amber' },
+      acne: { val: 15, tag: 'Low',    tagClass: 'tag-good',    colorClass: 'insight-card--red' },
+      tex:  { val: 45, tag: 'Fair',   tagClass: 'tag-fair',    colorClass: 'insight-card--blue' }
+    },
+    conditions: {
+      oil:  { val: 40, text: 'Opt',  color: '#0F6E56', bg: '#1D9E75' },
+      hyd:  { val: 65, text: 'Opt',  color: '#0F6E56', bg: '#5DCAA5' },
+      sen:  { val: 20, text: 'Low',  color: '#185FA5', bg: '#85B7EB' },
+      acne: { val: 15, text: 'Low',  color: '#185FA5', bg: '#85B7EB' },
+      line: { val: 35, text: 'Mild', color: '#BA7517', bg: '#FAC775' }
+    },
+    routine: '4-step morning · 5-step night',
+    products: {
+      morning: ['sc01', 'sc02', 'sc11', 'sc05'],
+      night: ['sc06', 'sc12', 'sc03', 'sc09', 'sc04']
+    }
+  },
+  'balanced_healthy': {
+    mood: { emoji: '✨', text: 'Balanced · Glowing' },
+    score: { num: 92, grade: 'Excellent', desc: 'Your skin is well-balanced and healthy. Focus on maintenance and protection.' },
+    insights: {
+      hyd:  { val: 88, tag: 'Great',  tagClass: 'tag-good', colorClass: 'insight-card--green' },
+      glow: { val: 90, tag: 'Great',  tagClass: 'tag-good', colorClass: 'insight-card--amber' },
+      acne: { val: 5,  tag: 'Low',    tagClass: 'tag-good', colorClass: 'insight-card--red' },
+      tex:  { val: 95, tag: 'Great',  tagClass: 'tag-good', colorClass: 'insight-card--blue' }
+    },
+    conditions: {
+      oil:  { val: 50, text: 'Opt',  color: '#0F6E56', bg: '#1D9E75' },
+      hyd:  { val: 88, text: 'High', color: '#0F6E56', bg: '#5DCAA5' },
+      sen:  { val: 10, text: 'Low',  color: '#185FA5', bg: '#85B7EB' },
+      acne: { val: 5,  text: 'Low',  color: '#185FA5', bg: '#85B7EB' },
+      line: { val: 10, text: 'Low',  color: '#185FA5', bg: '#85B7EB' }
+    },
+    routine: '3-step morning · 3-step night',
+    products: {
+      morning: ['sc01', 'sc04', 'sc05'],
+      night: ['sc06', 'sc08', 'sc10']
+    }
+  }
+});
+
+function applyScenario(scenarioKey) {
+  const data = SCAN_SCENARIOS[scenarioKey];
+  if (!data) return;
+
+  // Update Mood
+  const moodEmoji = document.getElementById('res-mood-emoji');
+  const moodText = document.getElementById('res-mood-text');
+  if (moodEmoji) moodEmoji.textContent = data.mood.emoji;
+  if (moodText) moodText.textContent = data.mood.text;
+
+  // Update Score
+  const scoreNum = document.getElementById('res-score-num');
+  const scoreGrade = document.getElementById('res-score-grade');
+  const scoreDesc = document.getElementById('res-score-desc');
+  if (scoreNum) scoreNum.textContent = data.score.num;
+  if (scoreGrade) scoreGrade.textContent = data.score.grade;
+  if (scoreDesc) scoreDesc.textContent = data.score.desc;
+
+  // Update Routine text
+  const routineText = document.getElementById('res-routine-text');
+  if (routineText) routineText.textContent = data.routine;
+
+  // Update Insights
+  const updateInsight = (id, obj) => {
+    const valEl = document.getElementById('res-score-' + id);
+    const tagEl = document.getElementById('res-tag-' + id);
+    const cardEl = document.getElementById('res-card-' + id);
+    if (valEl) valEl.innerHTML = obj.val + '<span>%</span>';
+    if (tagEl) {
+      tagEl.textContent = obj.tag;
+      tagEl.className = 'insight-tag ' + obj.tagClass;
+    }
+    if (cardEl) {
+      cardEl.className = 'insight-card ' + obj.colorClass;
+    }
+  };
+  updateInsight('hyd', data.insights.hyd);
+  updateInsight('glow', data.insights.glow);
+  updateInsight('acne', data.insights.acne);
+  updateInsight('tex', data.insights.tex);
+
+  // Update Conditions
+  const updateCond = (id, obj) => {
+    const fillEl = document.getElementById('res-cond-' + id + '-fill');
+    const valEl = document.getElementById('res-cond-' + id + '-val');
+    if (fillEl) {
+      fillEl.style.width = obj.val + '%';
+      fillEl.style.background = obj.bg;
+    }
+    if (valEl) {
+      valEl.textContent = obj.text;
+      valEl.style.color = obj.color;
+    }
+  };
+  updateCond('oil', data.conditions.oil);
+  updateCond('hyd', data.conditions.hyd);
+  updateCond('sen', data.conditions.sen);
+  updateCond('acne', data.conditions.acne);
+  updateCond('line', data.conditions.line);
+
+
+}
+
 async function startCamera() {
   const video = document.getElementById('webcam');
   const icon = document.querySelector('.scan-icon');
@@ -109,6 +298,11 @@ function triggerScan() {
           titleText.textContent = 'Analyzing your skin...';
           stepText.textContent = 'Initializing AI scanner';
         }, 400);
+
+        // Pick random scenario
+        const scenarioKeys = Object.keys(SCAN_SCENARIOS);
+        const randomKey = scenarioKeys[Math.floor(Math.random() * scenarioKeys.length)];
+        applyScenario(randomKey);
 
         hasScanned = true;
         updateResultsVisibility();
@@ -288,18 +482,6 @@ function navigate(to) {
   updateDesktopPanel(to);
 }
 
-function switchRecTab(tab) {
-  document.querySelectorAll('.rec-tab').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.rec-products-container').forEach(el => el.classList.remove('active'));
-  
-  if (tab === 'morning') {
-    document.getElementById('tab-morning').classList.add('active');
-    document.getElementById('rec-morning').classList.add('active');
-  } else if (tab === 'night') {
-    document.getElementById('tab-night').classList.add('active');
-    document.getElementById('rec-night').classList.add('active');
-  }
-}
 
 const productData = {
   sc01: {

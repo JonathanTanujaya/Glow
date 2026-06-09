@@ -160,11 +160,11 @@
       <div class="skin-mood-strip">
         <div class="mood-indicator">
           <span class="mood-dot"></span>
-          <span class="mood-emoji">💧</span>
+          <span class="mood-emoji" id="res-mood-emoji">💧</span>
         </div>
         <div class="mood-text">
           <p class="mood-label">Today's Skin Mood</p>
-          <p class="mood-value">Slightly Dehydrated · Oily T-Zone</p>
+          <p class="mood-value" id="res-mood-text">Slightly Dehydrated · Oily T-Zone</p>
         </div>
         <i class="ti ti-chevron-right mood-arrow"></i>
       </div>
@@ -172,49 +172,49 @@
       <div class="card">
         <div class="score-row">
           <div class="score-ring">
-            <span class="score-num">74</span>
+            <span class="score-num" id="res-score-num">74</span>
             <span class="score-lbl">score</span>
           </div>
           <div class="score-info">
-            <p class="score-grade">Good condition</p>
-            <p class="score-desc">Oily T-zone with mild dehydration. Your personalized formula is ready.</p>
+            <p class="score-grade" id="res-score-grade">Good condition</p>
+            <p class="score-desc" id="res-score-desc">Oily T-zone with mild dehydration. Your personalized formula is ready.</p>
           </div>
         </div>
       </div>
 
       <!-- Insight Score Cards -->
       <div class="insight-cards-grid">
-        <div class="insight-card insight-card--green">
-          <div class="insight-icon-wrap" style="background: rgba(93,202,165,0.12); color: #5DCAA5;">
+        <div class="insight-card insight-card--green" id="res-card-hyd">
+          <div class="insight-icon-wrap" id="res-icon-hyd" style="background: rgba(93,202,165,0.12); color: #5DCAA5;">
             <i class="ti ti-droplet"></i>
           </div>
           <p class="insight-label">Hydration</p>
-          <p class="insight-score">35<span>%</span></p>
-          <span class="insight-tag tag-warning">Low</span>
+          <p class="insight-score" id="res-score-hyd">35<span>%</span></p>
+          <span class="insight-tag tag-warning" id="res-tag-hyd">Low</span>
         </div>
-        <div class="insight-card insight-card--amber">
-          <div class="insight-icon-wrap" style="background: rgba(250,199,117,0.12); color: #FAC775;">
+        <div class="insight-card insight-card--amber" id="res-card-glow">
+          <div class="insight-icon-wrap" id="res-icon-glow" style="background: rgba(250,199,117,0.12); color: #FAC775;">
             <i class="ti ti-sun"></i>
           </div>
           <p class="insight-label">Glow Level</p>
-          <p class="insight-score">62<span>%</span></p>
-          <span class="insight-tag tag-fair">Fair</span>
+          <p class="insight-score" id="res-score-glow">62<span>%</span></p>
+          <span class="insight-tag tag-fair" id="res-tag-glow">Fair</span>
         </div>
-        <div class="insight-card insight-card--red">
-          <div class="insight-icon-wrap" style="background: rgba(226,75,74,0.10); color: #E24B4A;">
+        <div class="insight-card insight-card--red" id="res-card-acne">
+          <div class="insight-icon-wrap" id="res-icon-acne" style="background: rgba(226,75,74,0.10); color: #E24B4A;">
             <i class="ti ti-flame"></i>
           </div>
           <p class="insight-label">Acne Risk</p>
-          <p class="insight-score">45<span>%</span></p>
-          <span class="insight-tag tag-warning">Medium</span>
+          <p class="insight-score" id="res-score-acne">45<span>%</span></p>
+          <span class="insight-tag tag-warning" id="res-tag-acne">Medium</span>
         </div>
-        <div class="insight-card insight-card--blue">
-          <div class="insight-icon-wrap" style="background: rgba(55,138,221,0.10); color: #378ADD;">
+        <div class="insight-card insight-card--blue" id="res-card-tex">
+          <div class="insight-icon-wrap" id="res-icon-tex" style="background: rgba(55,138,221,0.10); color: #378ADD;">
             <i class="ti ti-grain"></i>
           </div>
           <p class="insight-label">Texture</p>
-          <p class="insight-score">71<span>%</span></p>
-          <span class="insight-tag tag-good">Good</span>
+          <p class="insight-score" id="res-score-tex">71<span>%</span></p>
+          <span class="insight-tag tag-good" id="res-tag-tex">Good</span>
         </div>
       </div>
 
@@ -227,7 +227,7 @@
         </div>
         <div class="routine-text">
           <p class="routine-label">Recommended Routine</p>
-          <p class="routine-value">5-step morning · 5-step night</p>
+          <p class="routine-value" id="res-routine-text">5-step morning · 5-step night</p>
         </div>
         <span class="routine-arrow"><i class="ti ti-arrow-down"></i></span>
       </div>
@@ -236,28 +236,28 @@
         <p class="cond-title">Detected conditions</p>
         <div class="cond-row">
           <span class="cond-name">Oiliness</span>
-          <div class="bar-track"><div class="bar-fill" style="width:70%;background:#1D9E75;"></div></div>
-          <span class="cond-val" style="color:#0F6E56;">High</span>
+          <div class="bar-track"><div class="bar-fill" id="res-cond-oil-fill" style="width:70%;background:#1D9E75;"></div></div>
+          <span class="cond-val" id="res-cond-oil-val" style="color:#0F6E56;">High</span>
         </div>
         <div class="cond-row">
           <span class="cond-name">Hydration</span>
-          <div class="bar-track"><div class="bar-fill" style="width:35%;background:#FAC775;"></div></div>
-          <span class="cond-val" style="color:#BA7517;">Low</span>
+          <div class="bar-track"><div class="bar-fill" id="res-cond-hyd-fill" style="width:35%;background:#FAC775;"></div></div>
+          <span class="cond-val" id="res-cond-hyd-val" style="color:#BA7517;">Low</span>
         </div>
         <div class="cond-row">
           <span class="cond-name">Sensitivity</span>
-          <div class="bar-track"><div class="bar-fill" style="width:28%;background:#5DCAA5;"></div></div>
-          <span class="cond-val" style="color:#0F6E56;">Mild</span>
+          <div class="bar-track"><div class="bar-fill" id="res-cond-sen-fill" style="width:28%;background:#5DCAA5;"></div></div>
+          <span class="cond-val" id="res-cond-sen-val" style="color:#0F6E56;">Mild</span>
         </div>
         <div class="cond-row">
           <span class="cond-name">Acne</span>
-          <div class="bar-track"><div class="bar-fill" style="width:45%;background:#E24B4A;"></div></div>
-          <span class="cond-val" style="color:#A32D2D;">Med</span>
+          <div class="bar-track"><div class="bar-fill" id="res-cond-acne-fill" style="width:45%;background:#E24B4A;"></div></div>
+          <span class="cond-val" id="res-cond-acne-val" style="color:#A32D2D;">Med</span>
         </div>
         <div class="cond-row">
           <span class="cond-name">Fine lines</span>
-          <div class="bar-track"><div class="bar-fill" style="width:18%;background:#85B7EB;"></div></div>
-          <span class="cond-val" style="color:#185FA5;">Low</span>
+          <div class="bar-track"><div class="bar-fill" id="res-cond-line-fill" style="width:18%;background:#85B7EB;"></div></div>
+          <span class="cond-val" id="res-cond-line-val" style="color:#185FA5;">Low</span>
         </div>
       </div>
 
@@ -267,108 +267,30 @@
         <i class="ti ti-sparkles" style="color: var(--green);"></i> Recommended Routine
       </div>
 
-      <div class="rec-tabs">
-        <div class="rec-tab active" id="tab-morning" onclick="switchRecTab('morning')">
-          <i class="ti ti-sun"></i> Morning
+      <div class="curated-grid">
+        <div class="curated-item">
+          <div class="curated-img-wrap"><img src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=200&auto=format&fit=crop" alt="Cleanser"></div>
+          <span class="curated-label">Cleanser</span>
         </div>
-        <div class="rec-tab" id="tab-night" onclick="switchRecTab('night')">
-          <i class="ti ti-moon"></i> Night
+        <div class="curated-item">
+          <div class="curated-img-wrap"><img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=200&auto=format&fit=crop" alt="Serum"></div>
+          <span class="curated-label">Serum</span>
         </div>
-      </div>
-
-      <!-- Morning Recommendations -->
-      <div class="rec-products-container active" id="rec-morning">
-        <!-- Product 1 (sc01) -->
-        <div class="product-card" onclick="showProductDetails('sc01')">
-          <div class="product-img-wrapper">
-            <img src="sc01.png" alt="Gentle Gel Cleanser" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
-            <i class="ti ti-droplet product-placeholder-icon"></i>
-          </div>
-          <p class="product-name">Gentle Gel Cleanser</p>
+        <div class="curated-item">
+          <div class="curated-img-wrap"><img src="https://img.magnific.com/premium-photo/cream-container-opens-with-white-cream-white-background_988095-27570.jpg?semt=ais_hybrid&w=740&q=80" alt="Moisturizer"></div>
+          <span class="curated-label">Moisturizer</span>
         </div>
-
-        <!-- Product 2 (sc02) -->
-        <div class="product-card" onclick="showProductDetails('sc02')">
-          <div class="product-img-wrapper">
-            <img src="sc02.png" alt="Hydrating Essence Toner" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
-            <i class="ti ti-droplet product-placeholder-icon"></i>
-          </div>
-          <p class="product-name">Hydrating Essence</p>
+        <div class="curated-item">
+          <div class="curated-img-wrap"><img src="https://hitechformulations.com/wp-content/uploads/2022/07/shutterstock_531060736-10.jpg" alt="Sunscreen"></div>
+          <span class="curated-label">Sunscreen</span>
         </div>
-
-        <!-- Product 3 (sc03) -->
-        <div class="product-card" onclick="showProductDetails('sc03')">
-          <div class="product-img-wrapper">
-            <img src="sc03.png" alt="10% Niacinamide Serum" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
-            <i class="ti ti-flask product-placeholder-icon"></i>
-          </div>
-          <p class="product-name">Niacinamide Serum</p>
+        <div class="curated-item">
+          <div class="curated-img-wrap"><img src="https://img.magnific.com/premium-photo/bottles-cosmetic-products-without-label-body-care-concept_184860-833.jpg" alt="Body Care"></div>
+          <span class="curated-label">Body Care</span>
         </div>
-
-        <!-- Product 4 (sc04) -->
-        <div class="product-card" onclick="showProductDetails('sc04')">
-          <div class="product-img-wrapper">
-            <img src="sc04.png" alt="Centella Soothing Moisturizer" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
-            <i class="ti ti-sparkles product-placeholder-icon"></i>
-          </div>
-          <p class="product-name">Soothing Cream</p>
-        </div>
-
-        <!-- Product 5 (sc05) -->
-        <div class="product-card" onclick="showProductDetails('sc05')">
-          <div class="product-img-wrapper">
-            <img src="sc05.png" alt="SPF 50+ Sunscreen" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
-            <i class="ti ti-sun product-placeholder-icon"></i>
-          </div>
-          <p class="product-name">UV Defense SPF 50+</p>
-        </div>
-      </div>
-
-      <!-- Night Recommendations -->
-      <div class="rec-products-container" id="rec-night">
-        <!-- Product 6 (sc06) -->
-        <div class="product-card" onclick="showProductDetails('sc06')">
-          <div class="product-img-wrapper">
-            <img src="sc06.png" alt="Purifying Cleansing Oil" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
-            <i class="ti ti-leaf product-placeholder-icon"></i>
-          </div>
-          <p class="product-name">Cleansing Oil</p>
-        </div>
-
-        <!-- Product 7 (sc07) -->
-        <div class="product-card" onclick="showProductDetails('sc07')">
-          <div class="product-img-wrapper">
-            <img src="sc07.png" alt="2% BHA Pore Clarifying Liquid" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
-            <i class="ti ti-flask product-placeholder-icon"></i>
-          </div>
-          <p class="product-name">BHA Pore Liquid</p>
-        </div>
-
-        <!-- Product 8 (sc08) -->
-        <div class="product-card" onclick="showProductDetails('sc08')">
-          <div class="product-img-wrapper">
-            <img src="sc08.png" alt="0.5% Bakuchiol Renewal Serum" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
-            <i class="ti ti-activity product-placeholder-icon"></i>
-          </div>
-          <p class="product-name">Bakuchiol Serum</p>
-        </div>
-
-        <!-- Product 9 (sc09) -->
-        <div class="product-card" onclick="showProductDetails('sc09')">
-          <div class="product-img-wrapper">
-            <img src="sc09.png" alt="Peptide Eye Cream" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
-            <i class="ti ti-sparkles product-placeholder-icon"></i>
-          </div>
-          <p class="product-name">Peptide Eye Cream</p>
-        </div>
-
-        <!-- Product 10 (sc10) -->
-        <div class="product-card" onclick="showProductDetails('sc10')">
-          <div class="product-img-wrapper">
-            <img src="sc10.png" alt="Ceramide Night Barrier Cream" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
-            <i class="ti ti-moon product-placeholder-icon"></i>
-          </div>
-          <p class="product-name">Ceramide Cream</p>
+        <div class="curated-item">
+          <div class="curated-img-wrap"><img src="https://cdn.faire.com/fastly/d59ba0917b5648f4e33ceb98692670508a7f86cf042a57dd14561751b0c38eee.png?bg-color=FFFFFF&dpr=1&fit=crop&format=jpg&height=720&width=720" alt="Lotion"></div>
+          <span class="curated-label">Lotion</span>
         </div>
       </div>
     </div>
